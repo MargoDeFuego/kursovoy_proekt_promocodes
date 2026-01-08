@@ -1,0 +1,4 @@
+Django==5.1.*
+gunicorn==22.0.0
+Pillow>=10.0.0
+psycopg[binary]>=3.1

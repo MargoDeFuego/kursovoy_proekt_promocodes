@@ -1,0 +1,26 @@
+<h1>{{ group.name }}</h1>
+
+<a href="{% url 'group_list' %}">← Все группы</a>
+
+<hr>
+
+{% for promo in promos %}
+  <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+    <h3>{{ promo.shop.name }}</h3>
+    <p><b>{{ promo.title }}</b></p>
+
+    {% if promo.code %}
+      <button onclick="this.nextElementSibling.style.display='inline'">
+        Открыть промокод
+      </button>
+
+      <span style="display:none; font-weight:bold;">
+        {{ promo.code }}
+      </span>
+    {% else %}
+      <em>Акция без промокода</em>
+    {% endif %}
+  </div>
+{% empty %}
+  <p>В этой группе пока нет промокодов</p>
+{% endfor %}

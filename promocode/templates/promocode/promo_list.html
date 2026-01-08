@@ -1,0 +1,32 @@
+<h1>Промокоды магазинов</h1>
+
+{% for promo in promos %}
+  <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+    <h3>{{ promo.shop.name }}</h3>
+
+    <p><b>{{ promo.title }}</b></p>
+
+    {% if promo.groups.exists %}
+      <p>
+        Группы:
+        {% for group in promo.groups.all %}
+          <span style="font-size:12px;">{{ group.name }}</span>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+
+    {% if promo.code %}
+      <button onclick="this.nextElementSibling.style.display='inline'">
+        Открыть промокод
+      </button>
+
+      <span style="display:none; font-weight:bold;">
+        {{ promo.code }}
+      </span>
+    {% else %}
+      <em>Акция без промокода</em>
+    {% endif %}
+  </div>
+{% empty %}
+  <p>Нет активных промокодов</p>
+{% endfor %}

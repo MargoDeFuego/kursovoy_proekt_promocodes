@@ -1,0 +1,53 @@
+from django.contrib import admin
+from .models import Shop, Promo, PromoGroup
+
+
+
+
+class PromoInline(admin.TabularInline):
+    model = Promo
+    extra = 0
+    readonly_fields = ("created_at",)
+
+
+@admin.register(Shop)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "promo_count",
+    )
+    search_fields = ("name",)
+
+    @admin.display(description="Кол-во промокодов")
+    def promo_count(self, obj):
+        return obj.promos.count()
+
+@admin.register(Promo)
+class PromoAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "shop",
+        "is_active",
+        "created_at",
+        "expires_at",
+        "hidden_code",
+    )
+
+    list_display_links = ("title",)
+    list_filter = ("shop", "is_active", "created_at", "expires_at")
+    search_fields = ("title", "code", "shop__name")
+    date_hierarchy = "created_at"
+
+    raw_id_fields = ("shop",)
+    readonly_fields = ("created_at",)
+    inlines = ()
+
+    @admin.display(description="Промокод")
+    def hidden_code(self, obj):
+        return "•••••"
+        
+@admin.register(PromoGroup)
+class PromoGroupAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
