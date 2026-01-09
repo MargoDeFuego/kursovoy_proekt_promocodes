@@ -1,0 +1,11 @@
+<h1>{{ promo.title }}</h1>
+
+<p>Магазин: {{ promo.shop }}</p>
+<p>Описание: {{ promo.description }}</p>
+<p>Промокод: {{ promo.code|default:"—" }}</p>
+
+<hr>
+
+<a href="{% url 'promo_update' promo.pk %}">Редактировать</a> |
+<a href="{% url 'promo_delete' promo.pk %}">Удалить</a> |
+<a href="{% url 'promo_list' %}">К списку</a>

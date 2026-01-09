@@ -1,0 +1,12 @@
+<h1>Удалить промокод</h1>
+
+<p>
+  Вы уверены, что хотите удалить промокод:
+  <strong>{{ promo.title }}</strong>?
+</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Да, удалить</button>
+  <a href="{% url 'promo_detail' promo.pk %}">Отмена</a>
+</form>

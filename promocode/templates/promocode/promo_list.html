@@ -1,10 +1,16 @@
 <h1>Промокоды магазинов</h1>
 
+<p>
+  <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
+</p>
+
 {% for promo in promos %}
   <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
     <h3>{{ promo.shop.name }}</h3>
 
-    <p><b>{{ promo.title }}</b></p>
+     <a href="{% url 'promo_detail' promo.pk %}">
+        {{ promo.title }}
+      </a>
 
     {% if promo.groups.exists %}
       <p>
