@@ -8,6 +8,7 @@ urlpatterns = [
     # Группа → промокоды группы
     path("groups/<slug:slug>/", views.group_detail, name="group_detail"),
 
+
     # CRUD промокодов (tutorial Part 3–4)
     path("promos/", views.promo_list, name="promo_list"),                 # READ LIST
     path("promo/add/", views.promo_create, name="promo_create"),          # CREATE

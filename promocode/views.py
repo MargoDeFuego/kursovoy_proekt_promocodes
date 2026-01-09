@@ -3,9 +3,7 @@ from .models import Promo, PromoGroup
 from .forms import PromoForm
 
 
-# ─────────────────────────────
 # Part 3 tutorial — LIST / READ
-# ─────────────────────────────
 
 def group_list(request):
     """
@@ -60,9 +58,7 @@ def promo_detail(request, pk):
     )
 
 
-# ─────────────────────────────
 # Part 4 tutorial — FORMS / POST
-# ─────────────────────────────
 
 def promo_create(request):
     """

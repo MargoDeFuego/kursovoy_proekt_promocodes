@@ -45,7 +45,6 @@ class PromoAdmin(admin.ModelAdmin):
         return obj.code or "—"
 
 
-
 @admin.register(PromoGroup)
 class PromoGroupAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "promo_count")
