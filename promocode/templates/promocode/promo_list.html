@@ -4,6 +4,7 @@
   <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
 </p>
 
+
 {% for promo in promos %}
   <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
     <h3>{{ promo.shop.name }}</h3>

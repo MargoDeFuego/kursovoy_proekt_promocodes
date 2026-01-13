@@ -40,6 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # <<< ДОБАВЛЕНО: DRF + фильтры + история >>>
+    'rest_framework',
+    'django_filters',
+    'simple_history',
+
+     'import_export',
+
     # local apps
     'promocode',
 ]
@@ -54,12 +61,14 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
 
-    # CSRF — включён, pgAdmin не трогаем
     'django.middleware.csrf.CsrfViewMiddleware',
 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # <<< ДОБАВЛЕНО: simple-history >>>
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 
@@ -100,7 +109,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'django_pass'),
         'HOST': os.environ.get('POSTGRES_HOST', 'db'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-        'CONN_MAX_AGE': 60,  # соединения живут дольше, меньше overhead
+        'CONN_MAX_AGE': 60,
     }
 }
 
@@ -134,6 +143,29 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# ======================================================
+# MEDIA FILES
+# ======================================================
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ======================================================
+# REST FRAMEWORK  <<< ДОБАВЛЕНО
+# ======================================================
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 6,
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ],
+}
 
 
 # ======================================================

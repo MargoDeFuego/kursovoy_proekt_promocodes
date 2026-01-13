@@ -1,4 +1,5 @@
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 
 class Shop(models.Model):
@@ -82,6 +83,8 @@ class Promo(models.Model):
         verbose_name="Группы",
         blank=True
     )
+
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = "Промокод"

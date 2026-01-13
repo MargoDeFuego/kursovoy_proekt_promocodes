@@ -1,4 +1,6 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
+
 from .models import Shop, Promo, PromoGroup
 
 
@@ -21,7 +23,7 @@ class ShopAdmin(admin.ModelAdmin):
 
 
 @admin.register(Promo)
-class PromoAdmin(admin.ModelAdmin):
+class PromoAdmin(ImportExportModelAdmin):
     list_display = (
         "title",
         "shop",
@@ -30,7 +32,6 @@ class PromoAdmin(admin.ModelAdmin):
         "expires_at",
         "hidden_code",
     )
-
     list_display_links = ("title",)
     list_filter = ("shop", "is_active", "created_at", "expires_at", "groups")
     search_fields = ("title", "code", "shop__name")

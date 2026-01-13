@@ -1,9 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator  # <<< ДОБАВЛЕНО
 from .models import Promo, PromoGroup
 from .forms import PromoForm
 
 
+# ======================================================
 # Part 3 tutorial — LIST / READ
+# ======================================================
 
 def group_list(request):
     """
@@ -20,9 +23,19 @@ def group_list(request):
 def group_detail(request, slug):
     """
     Страница одной группы — список промокодов группы
+    + HTML-пагинация
     """
     group = get_object_or_404(PromoGroup, slug=slug)
-    promos = group.promos.select_related("shop").order_by("-created_at")
+
+    promo_qs = (
+        group.promos
+        .select_related("shop")
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(promo_qs, 3)  # <<< 3 промокода на страницу
+    page_number = request.GET.get("page")
+    promos = paginator.get_page(page_number)
 
     return render(
         request,
@@ -36,9 +49,15 @@ def group_detail(request, slug):
 
 def promo_list(request):
     """
-    Список всех промокодов (пример READ LIST)
+    Список всех промокодов
+    + HTML-пагинация
     """
-    promos = Promo.objects.select_related("shop").order_by("-created_at")
+    promo_qs = Promo.objects.select_related("shop").order_by("-created_at")
+
+    paginator = Paginator(promo_qs, 5)  # <<< 5 промокодов на страницу
+    page_number = request.GET.get("page")
+    promos = paginator.get_page(page_number)
+
     return render(
         request,
         "promocode/promo_list.html",
@@ -58,7 +77,9 @@ def promo_detail(request, pk):
     )
 
 
+# ======================================================
 # Part 4 tutorial — FORMS / POST
+# ======================================================
 
 def promo_create(request):
     """

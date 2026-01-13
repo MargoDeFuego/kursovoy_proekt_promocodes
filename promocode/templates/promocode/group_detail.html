@@ -1,13 +1,38 @@
+
 <h1>{{ group.name }}</h1>
 
-<a href="{% url 'group_list' %}">← Все группы</a>
+<p>
+  <a href="{% url 'group_list' %}">← Все группы</a>
+  |
+  <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
+</p>
+
+<hr>
 
 <hr>
 
 {% for promo in promos %}
   <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+ {% if promo.shop.logo %}
+    <img
+      src="{{ promo.shop.logo.url }}"
+      alt="{{ promo.shop.name }}"
+      style="width:80px; height:auto; object-fit:contain;"
+    >
+  {% endif %}
+
     <h3>{{ promo.shop.name }}</h3>
-    <p><b>{{ promo.title }}</b></p>
+<p>
+  <a href="{% url 'promo_detail' promo.pk %}">
+    <b>{{ promo.title }}</b>
+  </a>
+</p>
+
+<p>
+
+    <b>{{ promo.description }}</b>
+
+</p>
 
     {% if promo.code %}
       <button onclick="this.nextElementSibling.style.display='inline'">
@@ -24,3 +49,20 @@
 {% empty %}
   <p>В этой группе пока нет промокодов</p>
 {% endfor %}
+
+
+{% if promos.has_other_pages %}
+  <div style="margin-top:20px;">
+    {% if promos.has_previous %}
+      <a href="?page={{ promos.previous_page_number }}">← Назад</a>
+    {% endif %}
+
+    <span style="margin:0 10px;">
+      Страница {{ promos.number }} из {{ promos.paginator.num_pages }}
+    </span>
+
+    {% if promos.has_next %}
+      <a href="?page={{ promos.next_page_number }}">Вперёд →</a>
+    {% endif %}
+  </div>
+{% endif %}
