@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator  # <<< ДОБАВЛЕНО
+from django.core.paginator import Paginator  
 from .models import Promo, PromoGroup
 from .forms import PromoForm
 
@@ -33,7 +33,7 @@ def group_detail(request, slug):
         .order_by("-created_at")
     )
 
-    paginator = Paginator(promo_qs, 3)  # <<< 3 промокода на страницу
+    paginator = Paginator(promo_qs, 3)  # 3 промокода на страницу
     page_number = request.GET.get("page")
     promos = paginator.get_page(page_number)
 
@@ -54,7 +54,7 @@ def promo_list(request):
     """
     promo_qs = Promo.objects.select_related("shop").order_by("-created_at")
 
-    paginator = Paginator(promo_qs, 5)  # <<< 5 промокодов на страницу
+    paginator = Paginator(promo_qs, 5)  # 5 промокодов на страницу
     page_number = request.GET.get("page")
     promos = paginator.get_page(page_number)
 

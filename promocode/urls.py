@@ -14,9 +14,10 @@ urlpatterns = [
 
 # --- DRF router (подключаем только если DRF установлен) ---
 from rest_framework.routers import DefaultRouter
-from .api_views import PromoViewSet
+from .api_views import PromoViewSet, ShopViewSet  
 
 router = DefaultRouter()
 router.register(r"api/promos", PromoViewSet, basename="promo")
+router.register(r"api/shops", ShopViewSet, basename="shop")  
 
 urlpatterns += router.urls
