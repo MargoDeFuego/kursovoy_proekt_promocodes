@@ -1,39 +1,153 @@
-<h1>Промокоды магазинов</h1>
+<h1 class="page-title">Промокоды магазинов</h1>
 
-<p>
+<p class="add-btn">
   <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
 </p>
 
+<div class="promo-list">
+  {% for promo in promos %}
+    <div class="promo-card">
 
-{% for promo in promos %}
-  <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-    <h3>{{ promo.shop.name }}</h3>
+      <h3 class="shop-name">{{ promo.shop.name }}</h3>
 
-     <a href="{% url 'promo_detail' promo.pk %}">
+      <a class="promo-title" href="{% url 'promo_detail' promo.pk %}">
         {{ promo.title }}
       </a>
 
-    {% if promo.groups.exists %}
-      <p>
-        Группы:
-        {% for group in promo.groups.all %}
-          <span style="font-size:12px;">{{ group.name }}</span>{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </p>
-    {% endif %}
+      {% if promo.groups.exists %}
+        <div class="promo-groups">
+          {% for group in promo.groups.all %}
+            <span class="group-tag">{{ group.name }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-    {% if promo.code %}
-      <button onclick="this.nextElementSibling.style.display='inline'">
-        Открыть промокод
-      </button>
+      <div class="promo-footer">
+        {% if promo.code %}
+          <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')">
+            Показать код
+          </button>
 
-      <span style="display:none; font-weight:bold;">
-        {{ promo.code }}
-      </span>
-    {% else %}
-      <em>Акция без промокода</em>
-    {% endif %}
-  </div>
-{% empty %}
-  <p>Нет активных промокодов</p>
-{% endfor %}
+          <span class="promo-code">
+            {{ promo.code }}
+          </span>
+        {% else %}
+          <em class="no-code">Без промокода</em>
+        {% endif %}
+      </div>
+
+    </div>
+  {% empty %}
+    <p class="empty">Нет активных промокодов</p>
+  {% endfor %}
+</div>
+
+<style>
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  .add-btn a {
+    background: #4CAF50;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .add-btn a:hover {
+    background: #45a049;
+  }
+
+  .promo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .promo-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: 0.2s;
+  }
+
+  .promo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .shop-name {
+    margin: 0;
+    font-size: 18px;
+    color: #444;
+  }
+
+  .promo-title {
+    display: block;
+    margin: 5px 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  .promo-title:hover {
+    text-decoration: underline;
+  }
+
+  .promo-groups {
+    margin: 10px 0;
+  }
+
+  .group-tag {
+    background: #eef;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-right: 5px;
+  }
+
+  .promo-footer {
+    margin-top: 10px;
+  }
+
+  .code-btn {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .code-btn:hover {
+    background: #e68900;
+  }
+
+  .promo-code {
+    display: none;
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .promo-code.visible {
+    display: inline;
+  }
+
+  .no-code {
+    color: #777;
+  }
+
+  .empty {
+    color: #777;
+    font-style: italic;
+  }
+</style>

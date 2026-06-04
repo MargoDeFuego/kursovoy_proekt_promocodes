@@ -1,13 +1,46 @@
-<h1>Группы промокодов</h1>
+<h1 class="page-title">Группы промокодов</h1>
 
-<ul>
+<div class="group-list">
   {% for group in groups %}
-    <li style="margin-bottom:10px;">
-      <a href="{% url 'group_detail' group.slug %}">
-        {{ group.name }}
-      </a>
-    </li>
+    <a class="group-item" href="{% url 'group_detail' group.slug %}">
+      {{ group.name }}
+    </a>
   {% empty %}
-    <li>Группы пока не созданы</li>
+    <p class="empty">Группы пока не созданы</p>
   {% endfor %}
-</ul>
+</div>
+
+<style>
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  .group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .group-item {
+    display: block;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #0077cc;
+    font-size: 18px;
+    transition: 0.2s;
+  }
+
+  .group-item:hover {
+    background: #f5faff;
+    border-color: #bcdcff;
+  }
+
+  .empty {
+    color: #777;
+    font-style: italic;
+  }
+</style>

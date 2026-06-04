@@ -1,12 +1,68 @@
-<h1>Удалить промокод</h1>
+<h1 class="page-title">Удалить промокод</h1>
 
-<p>
-  Вы уверены, что хотите удалить промокод:
-  <strong>{{ promo.title }}</strong>?
-</p>
+<div class="confirm-card">
+  <p class="confirm-text">
+    Вы действительно хотите удалить<br>
+    <strong>{{ promo.title }}</strong>?
+  </p>
 
-<form method="post">
-  {% csrf_token %}
-  <button type="submit">Да, удалить</button>
-  <a href="{% url 'promo_detail' promo.pk %}">Отмена</a>
-</form>
+  <form method="post" class="confirm-actions">
+    {% csrf_token %}
+
+    <button type="submit" class="delete-btn">Удалить</button>
+
+    <a href="{% url 'promo_detail' promo.pk %}" class="cancel-link">Отмена</a>
+  </form>
+</div>
+
+<style>
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  .confirm-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 25px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    max-width: 500px;
+  }
+
+  .confirm-text {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #444;
+    line-height: 1.4;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .delete-btn {
+    background: #e53935;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .delete-btn:hover {
+    background: #c62828;
+  }
+
+  .cancel-link {
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  .cancel-link:hover {
+    text-decoration: underline;
+  }
+</style>

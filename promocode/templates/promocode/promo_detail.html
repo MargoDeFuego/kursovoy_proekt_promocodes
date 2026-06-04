@@ -1,11 +1,141 @@
-<h1>{{ promo.title }}</h1>
+<h1 class="page-title">{{ promo.title }}</h1>
 
-<p>Магазин: {{ promo.shop }}</p>
-<p>Описание: {{ promo.description }}</p>
-<p>Промокод: {{ promo.code|default:"—" }}</p>
+<p class="back-link">
+  <a href="{% url 'promo_list' %}">← К списку</a>
+</p>
 
-<hr>
+<div class="promo-card">
 
-<a href="{% url 'promo_update' promo.pk %}">Редактировать</a> |
-<a href="{% url 'promo_delete' promo.pk %}">Удалить</a> |
-<a href="{% url 'promo_list' %}">К списку</a>
+  {% if promo.shop.logo %}
+    <img
+      src="{{ promo.shop.logo.url }}"
+      alt="{{ promo.shop.name }}"
+      class="shop-logo"
+    >
+  {% endif %}
+
+  <h3 class="shop-name">{{ promo.shop.name }}</h3>
+
+  {% if promo.description %}
+    <p class="promo-desc">{{ promo.description }}</p>
+  {% endif %}
+
+  <div class="promo-footer">
+    {% if promo.code %}
+      <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')">
+        Показать код
+      </button>
+
+      <span class="promo-code">
+        {{ promo.code }}
+      </span>
+    {% else %}
+      <em class="no-code">Без промокода</em>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="actions">
+  <a href="{% url 'promo_update' promo.pk %}">Редактировать</a>
+  <span>•</span>
+  <a href="{% url 'promo_delete' promo.pk %}">Удалить</a>
+</div>
+
+<style>
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 15px;
+  }
+
+  .back-link a {
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+
+  .promo-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: 0.2s;
+    max-width: 500px;
+  }
+
+  .promo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .shop-logo {
+    width: 100px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+
+  .shop-name {
+    margin: 0;
+    font-size: 20px;
+    color: #444;
+  }
+
+  .promo-desc {
+    margin: 10px 0;
+    color: #555;
+  }
+
+  .code-btn {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .code-btn:hover {
+    background: #e68900;
+  }
+
+  .promo-code {
+    display: none;
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .promo-code.visible {
+    display: inline;
+  }
+
+  .no-code {
+    color: #777;
+  }
+
+  .actions {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+
+  .actions a {
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  .actions a:hover {
+    text-decoration: underline;
+  }
+
+  .actions span {
+    margin: 0 8px;
+    color: #999;
+  }
+</style>

@@ -1,4 +1,10 @@
-<h1>
+{% load static %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<h1 class="page-title">
   {% if form.instance.pk %}
     Редактировать промокод
   {% else %}
@@ -6,21 +12,101 @@
   {% endif %}
 </h1>
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
 
-  <button type="submit">
-    {% if form.instance.pk %}
-      Сохранить
-    {% else %}
-      Создать
-    {% endif %}
-  </button>
+    <div class="form-fields">
+      {{ form.as_p }}
+    </div>
 
-  {% if form.instance.pk %}
-    <a href="{% url 'promo_detail' form.instance.pk %}">Отмена</a>
-  {% else %}
-    <a href="{% url 'promo_list' %}">Отмена</a>
-  {% endif %}
-</form>
+    <div class="form-actions">
+      <button type="submit" class="submit-btn">
+        {% if form.instance.pk %}
+          Сохранить
+        {% else %}
+          Создать
+        {% endif %}
+      </button>
+
+      {% if form.instance.pk %}
+        <a class="cancel-link" href="{% url 'promo_detail' form.instance.pk %}">Отмена</a>
+      {% else %}
+        <a class="cancel-link" href="{% url 'promo_list' %}">Отмена</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<style>
+  .page-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+  }
+
+  .form-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 25px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    max-width: 600px;
+  }
+
+  .form-fields p {
+    margin-bottom: 15px;
+  }
+
+  .form-fields label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .form-fields input,
+  .form-fields select,
+  .form-fields textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+  }
+
+  .form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .submit-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .submit-btn:hover {
+    background: #45a049;
+  }
+
+  .cancel-link {
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  .cancel-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const selects = document.querySelectorAll("select");
+    selects.forEach(s => $(s).select2());
+  });
+</script>
