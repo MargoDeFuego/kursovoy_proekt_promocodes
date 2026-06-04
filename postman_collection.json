@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "PromoCode API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Коллекция запросов для проверки API сайта промокодов магазинов."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Promos list",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/"
+      }
+    },
+    {
+      "name": "Promos active",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/active/"
+      }
+    },
+    {
+      "name": "Filter by discount",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/?discount_min=10&discount_max=50"
+      }
+    },
+    {
+      "name": "Filter by category/group",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/?group=1"
+      }
+    },
+    {
+      "name": "Filter by manufacturer/shop",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/?manufacturer=shop"
+      }
+    },
+    {
+      "name": "Reveal promo code",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/promos/1/reveal/"
+      }
+    },
+    {
+      "name": "Register click",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/promos/1/click/"
+      }
+    },
+    {
+      "name": "Deactivate promo",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/promos/1/deactivate/"
+      }
+    },
+    {
+      "name": "Shops list",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/shops/"
+      }
+    },
+    {
+      "name": "Groups list",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/groups/"
+      }
+    }
+  ]
+}

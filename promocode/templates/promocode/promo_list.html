@@ -10,6 +10,8 @@
 
       <h3 class="shop-name">{{ promo.shop.name }}</h3>
 
+      <p class="promo-meta">Скидка: {{ promo.discount_percent }}% · Минимальный заказ: {{ promo.min_order_amount }} · Клики: {{ promo.click_count|default:0 }}</p>
+
       <a class="promo-title" href="{% url 'promo_detail' promo.pk %}">
         {{ promo.title }}
       </a>
@@ -24,7 +26,7 @@
 
       <div class="promo-footer">
         {% if promo.code %}
-          <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')">
+          <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')" aria-label="Показать промокод">
             Показать код
           </button>
 

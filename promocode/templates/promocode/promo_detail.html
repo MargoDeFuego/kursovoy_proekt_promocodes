@@ -16,19 +16,21 @@
 
   <h3 class="shop-name">{{ promo.shop.name }}</h3>
 
+  <p class="promo-meta">Скидка: {{ promo.discount_percent }}% · Минимальный заказ: {{ promo.min_order_amount }} · Использовано: {{ promo.used_count }}{% if promo.usage_limit %}/{{ promo.usage_limit }}{% endif %}</p>
+
   {% if promo.description %}
     <p class="promo-desc">{{ promo.description }}</p>
   {% endif %}
 
   <div class="promo-footer">
     {% if promo.code %}
-      <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')">
-        Показать код
-      </button>
-
-      <span class="promo-code">
-        {{ promo.code }}
-      </span>
+      {% if reveal_code or request.user.is_staff %}
+        <span class="promo-code visible">{{ promo.code }}</span>
+      {% elif request.user.is_authenticated %}
+        <a class="code-btn" href="{% url 'promo_reveal' promo.pk %}">Показать код</a>
+      {% else %}
+        <a class="code-btn" href="/admin/login/?next={% url 'promo_detail' promo.pk %}">Войдите, чтобы увидеть код</a>
+      {% endif %}
     {% else %}
       <em class="no-code">Без промокода</em>
     {% endif %}
