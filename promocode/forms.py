@@ -1,15 +1,28 @@
-"""Forms for promo-code management pages."""
-
-from __future__ import annotations
-
 from django import forms
+from django.core.validators import MinLengthValidator
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
 from .models import Promo
 
 
 class PromoForm(forms.ModelForm):
-    """Form with model-level business validation for promo codes."""
+    """Form with explicit validation and Select2 widgets."""
+
+    title = forms.CharField(
+        min_length=5,
+        error_messages={
+            "min_length": "Название должно содержать минимум 5 символов.",
+            "required": "Введите название промокода.",
+        },
+    )
+
+    code = forms.CharField(
+        min_length=5,
+        error_messages={
+            "min_length": "Код должен содержать минимум 5 символов.",
+            "required": "Введите код промокода.",
+        },
+    )
 
     class Meta:
         model = Promo
@@ -33,7 +46,6 @@ class PromoForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"rows": 4}),
         }
 
-    def clean(self) -> dict[str, object]:
-        """Run Django Model.clean() through ModelForm validation."""
+    def clean(self):
         cleaned_data = super().clean()
         return cleaned_data

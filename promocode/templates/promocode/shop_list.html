@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="page-title">Магазины</h1>
+
+<div class="shop-list">
+  {% for shop in shops %}
+    <div class="shop-card">
+      <strong>{{ shop.name }}</strong>
+    </div>
+  {% empty %}
+    <p>Пока нет магазинов</p>
+  {% endfor %}
+</div>
+
+<style>
+  .shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .shop-card {
+    background: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+</style>
+{% endblock %}

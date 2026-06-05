@@ -29,3 +29,19 @@ docker compose exec web python manage.py deactivate_expired_promos
 - Silk: http://localhost:8000/silk/
 - Mailhog: http://localhost:8025
 - pgAdmin: http://localhost:5050
+
+## Demo data and empty pages
+
+If the site opens but lists are empty, create demo shops, groups and promo codes:
+
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py seed_demo_data
+```
+
+Then open:
+
+- http://localhost:8000/
+- http://localhost:8000/promos/
+- http://localhost:8000/shops/
+

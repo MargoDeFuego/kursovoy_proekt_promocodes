@@ -10,9 +10,11 @@ from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
+from django.contrib.auth import login
 
 from .forms import PromoForm
-from .models import Promo, PromoGroup
+from .forms_auth import RegisterForm
+from .models import Promo, PromoGroup, Shop
 from .services import register_promo_click
 
 
@@ -21,14 +23,40 @@ def staff_required(function):
     return user_passes_test(lambda user: user.is_authenticated and user.is_staff)(function)
 
 
+# -----------------------------
+#   РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ
+# -----------------------------
+def register(request: HttpRequest) -> HttpResponse:
+    """Register a new user and auto-login."""
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("promo_list")
+    else:
+        form = RegisterForm()
+
+    return render(request, "promocode/register.html", {"form": form})
+
+
+# -----------------------------
+#   ПРОМОКОДЫ / ГРУППЫ / МАГАЗИНЫ
+# -----------------------------
+
 def group_list(request: HttpRequest) -> HttpResponse:
-    """Render main page with promo groups and annotated promo counts."""
-    groups = PromoGroup.objects.annotate(promo_count=Count("promos", filter=Q(promos__is_active=True))).order_by("name")
+    groups = PromoGroup.objects.annotate(
+        promo_count=Count("promos", filter=Q(promos__is_active=True))
+    ).order_by("name")
     return render(request, "promocode/group_list.html", {"groups": groups})
 
 
+def shop_list(request: HttpRequest) -> HttpResponse:
+    shops = Shop.objects.all().order_by("name")
+    return render(request, "promocode/shop_list.html", {"shops": shops})
+
+
 def group_detail(request: HttpRequest, slug: str) -> HttpResponse:
-    """Render one group with active promo codes and optimized relations."""
     group = get_object_or_404(PromoGroup, slug=slug)
     today = now().date()
     promo_qs = (
@@ -45,7 +73,6 @@ def group_detail(request: HttpRequest, slug: str) -> HttpResponse:
 
 
 def promo_list(request: HttpRequest) -> HttpResponse:
-    """Render paginated promo list with basic search and optimized queryset."""
     search_query = request.GET.get("q", "").strip()
     today = now().date()
     promo_qs = (
@@ -57,16 +84,20 @@ def promo_list(request: HttpRequest) -> HttpResponse:
         .order_by("-created_at")
     )
     if search_query:
-        promo_qs = promo_qs.filter(Q(title__icontains=search_query) | Q(shop__name__icontains=search_query))
+        promo_qs = promo_qs.filter(
+            Q(title__icontains=search_query) |
+            Q(shop__name__icontains=search_query)
+        )
     paginator = Paginator(promo_qs, 5)
     promos = paginator.get_page(request.GET.get("page"))
     return render(request, "promocode/promo_list.html", {"promos": promos, "q": search_query})
 
 
 def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    """Render promo details with optimized relations and click annotation."""
     promo = get_object_or_404(
-        Promo.objects.select_related("shop", "created_by").prefetch_related("groups").annotate(click_count=Count("clicks")),
+        Promo.objects.select_related("shop", "created_by")
+        .prefetch_related("groups")
+        .annotate(click_count=Count("clicks")),
         pk=pk,
     )
     return render(request, "promocode/promo_detail.html", {"promo": promo})
@@ -74,7 +105,6 @@ def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
-    """Reveal promo code to authenticated user and register analytic click."""
     promo = get_object_or_404(Promo.objects.select_related("shop"), pk=pk)
     if promo.can_be_used():
         register_promo_click(promo, request)
@@ -83,7 +113,6 @@ def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @staff_required
 def promo_create(request: HttpRequest) -> HttpResponse:
-    """Create promo code. Staff/admin role only."""
     form = PromoForm(request.POST or None)
     if form.is_valid():
         promo = form.save(commit=False)
@@ -96,7 +125,6 @@ def promo_create(request: HttpRequest) -> HttpResponse:
 
 @staff_required
 def promo_update(request: HttpRequest, pk: int) -> HttpResponse:
-    """Update promo code. Staff/admin role only."""
     promo = get_object_or_404(Promo, pk=pk)
     form = PromoForm(request.POST or None, instance=promo)
     if form.is_valid():
@@ -107,7 +135,6 @@ def promo_update(request: HttpRequest, pk: int) -> HttpResponse:
 
 @staff_required
 def promo_delete(request: HttpRequest, pk: int) -> HttpResponse:
-    """Delete promo code. Staff/admin role only."""
     promo = get_object_or_404(Promo, pk=pk)
     if request.method == "POST":
         promo.delete()

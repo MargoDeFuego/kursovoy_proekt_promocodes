@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+
 <h1 class="page-title">Удалить промокод</h1>
 
 <div class="confirm-card">
@@ -10,7 +14,6 @@
     {% csrf_token %}
 
     <button type="submit" class="delete-btn">Удалить</button>
-
     <a href="{% url 'promo_detail' promo.pk %}" class="cancel-link">Отмена</a>
   </form>
 </div>
@@ -24,7 +27,7 @@
   .confirm-card {
     background: #fff;
     border-radius: 10px;
-    padding: 20px 25px;
+    padding: 25px 30px;
     border: 1px solid #ddd;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     max-width: 500px;
@@ -32,9 +35,9 @@
 
   .confirm-text {
     font-size: 18px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     color: #444;
-    line-height: 1.4;
+    line-height: 1.5;
   }
 
   .confirm-actions {
@@ -47,7 +50,7 @@
     background: #e53935;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
@@ -60,9 +63,12 @@
   .cancel-link {
     color: #0077cc;
     text-decoration: none;
+    font-weight: bold;
   }
 
   .cancel-link:hover {
     text-decoration: underline;
   }
 </style>
+
+{% endblock %}

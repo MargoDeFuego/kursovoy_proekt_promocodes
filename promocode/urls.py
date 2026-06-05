@@ -9,8 +9,17 @@ from . import views
 from .api_views import PromoGroupViewSet, PromoViewSet, ShopViewSet
 
 urlpatterns = [
+    # Регистрация
+    path("register/", views.register, name="register"),
+
+    # Группы
     path("", views.group_list, name="group_list"),
     path("groups/<slug:slug>/", views.group_detail, name="group_detail"),
+
+    # Магазины
+    path("shops/", views.shop_list, name="shop_list"),
+
+    # Промокоды
     path("promos/", views.promo_list, name="promo_list"),
     path("promo/add/", views.promo_create, name="promo_create"),
     path("promo/<int:pk>/", views.promo_detail, name="promo_detail"),
@@ -19,6 +28,7 @@ urlpatterns = [
     path("promo/<int:pk>/delete/", views.promo_delete, name="promo_delete"),
 ]
 
+# API
 router = DefaultRouter()
 router.register(r"api/promos", PromoViewSet, basename="promo")
 router.register(r"api/shops", ShopViewSet, basename="shop")

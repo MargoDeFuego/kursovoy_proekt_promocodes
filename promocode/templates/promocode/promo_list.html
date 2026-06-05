@@ -1,8 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+
 <h1 class="page-title">Промокоды магазинов</h1>
 
+{% if request.user.is_staff %}
 <p class="add-btn">
   <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
 </p>
+{% endif %}
 
 <div class="promo-list">
   {% for promo in promos %}
@@ -153,3 +159,5 @@
     font-style: italic;
   }
 </style>
+
+{% endblock %}
