@@ -3,106 +3,110 @@
 {% block title %}{{ shop.name }} — промокоды{% endblock %}
 
 {% block content %}
-<h1 class="page-title">{{ shop.name }}</h1>
+<a href="{% url 'shop_list' %}" class="back-btn">← К списку магазинов</a>
+
+<section class="shop-detail-card">
+  <div class="shop-detail-header">
+    {% if shop.logo %}
+      <img src="{{ shop.logo.url }}" alt="Логотип {{ shop.name }}" class="shop-logo-large">
+    {% endif %}
+    <div>
+      <h1 class="page-title">{{ shop.name }}</h1>
+      {% if shop.category %}
+        <p class="shop-info"><strong>Категория:</strong> {{ shop.category }}</p>
+      {% endif %}
+      {% if shop.website %}
+        <p class="shop-info">
+          <strong>Сайт:</strong>
+          <a href="{{ shop.website }}" target="_blank" rel="noopener noreferrer">{{ shop.website }}</a>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="shop-stats-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ shop.active_promo_count|default:0 }}</span>
+      <span class="stat-label">активных промокодов</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ shop.total_promo_count|default:0 }}</span>
+      <span class="stat-label">всего промокодов</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ shop.total_click_count|default:0 }}</span>
+      <span class="stat-label">кликов по промокодам</span>
+    </div>
+  </div>
+</section>
+
+<h2 class="section-title">Промокоды магазина</h2>
 
 {% if promos %}
-<a href="{{ request.META.HTTP_REFERER }}" class="back-btn">← Назад</a>
-    <div class="promo-list">
-        {% for promo in promos %}
-            <div class="promo-card">
-                <div class="promo-header">
-                    <h3 class="promo-title">{{ promo.title }}</h3>
-                    {% if promo.expires_at %}
-                        <span class="promo-expire">
-                            до {{ promo.expires_at }}
-                        </span>
-                    {% endif %}
-                </div>
+  <div class="promo-list">
+    {% for promo in promos %}
+      <article class="promo-card">
+        <div class="promo-header">
+          <h3 class="promo-title">
+            <a href="{% url 'promo_detail' promo.pk %}">{{ promo.title }}</a>
+          </h3>
+          {% if promo.expires_at %}
+            <span class="promo-expire">до {{ promo.expires_at }}</span>
+          {% else %}
+            <span class="promo-expire">без срока</span>
+          {% endif %}
+        </div>
 
-                <p class="promo-description">
-                    {{ promo.description|truncatewords:20 }}
-                </p>
+        {% if promo.description %}
+          <p class="promo-description">{{ promo.description|truncatewords:24 }}</p>
+        {% endif %}
 
-                <div class="promo-footer">
-                    <a href="{% url 'promo_detail' promo.pk %}" class="promo-btn">Подробнее</a>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+        {% if promo.groups.exists %}
+          <div class="promo-groups">
+            {% for group in promo.groups.all %}
+              <span class="group-tag">{{ group.name }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="promo-footer">
+          <span>Скидка: {{ promo.discount_percent }}%</span>
+          <span>Минимальный заказ: {{ promo.min_order_amount }}</span>
+          <span>Клики: {{ promo.click_count|default:0 }}</span>
+          <a href="{% url 'promo_detail' promo.pk %}" class="promo-btn">Подробнее</a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
 {% else %}
-    <p>В этом магазине пока нет активных промокодов.</p>
+  <p>В этом магазине пока нет активных промокодов.</p>
 {% endif %}
 
 <style>
-    .promo-list {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        margin-top: 25px;
-    }
-
-    .promo-card {
-        background: #fff;
-        padding: 18px 22px;
-        border-radius: 10px;
-        border: 1px solid #e3e3e3;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        transition: 0.25s ease;
-    }
-
-    .promo-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-color: #c9c9c9;
-    }
-
-    .promo-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .promo-title {
-        font-size: 20px;
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .promo-expire {
-        font-size: 14px;
-        color: #777;
-    }
-
-    .promo-description {
-        margin: 12px 0;
-        color: #444;
-        line-height: 1.45;
-    }
-
-    .promo-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .promo-clicks {
-        font-size: 14px;
-        color: #666;
-    }
-
-    .promo-btn {
-        padding: 8px 14px;
-        background: #4a6cf7;
-        color: #fff;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 14px;
-        transition: 0.2s;
-    }
-
-    .promo-btn:hover {
-        background: #3b59d4;
-    }
+  .shop-detail-card { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .shop-detail-header { display: flex; gap: 18px; align-items: center; }
+  .shop-logo-large { width: 90px; height: 90px; object-fit: contain; border: 1px solid #eee; border-radius: 12px; background: #fff; }
+  .shop-info { margin: 6px 0; color: #444; overflow-wrap: anywhere; }
+  .shop-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 18px; }
+  .stat-card { background: #f6f8fb; border-radius: 10px; padding: 14px; border: 1px solid #e8edf5; }
+  .stat-value { display: block; font-size: 24px; font-weight: 700; color: #0077cc; }
+  .stat-label { color: #555; font-size: 13px; }
+  .section-title { margin: 20px 0 12px; font-size: 22px; }
+  .promo-list { display: flex; flex-direction: column; gap: 18px; }
+  .promo-card { background: #fff; padding: 18px 22px; border-radius: 10px; border: 1px solid #e3e3e3; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: 0.25s ease; }
+  .promo-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #c9c9c9; }
+  .promo-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .promo-title { font-size: 20px; font-weight: 600; margin: 0; }
+  .promo-title a { color: #0077cc; text-decoration: none; }
+  .promo-title a:hover { text-decoration: underline; }
+  .promo-expire { font-size: 14px; color: #777; white-space: nowrap; }
+  .promo-description { margin: 12px 0; color: #444; line-height: 1.45; }
+  .promo-groups { margin: 10px 0; }
+  .group-tag { background: #eef; padding: 4px 8px; border-radius: 6px; font-size: 12px; margin-right: 5px; }
+  .promo-footer { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: #555; font-size: 14px; }
+  .promo-btn { margin-left: auto; padding: 8px 14px; background: #4a6cf7; color: #fff; border-radius: 6px; text-decoration: none; font-size: 14px; transition: 0.2s; }
+  .promo-btn:hover { background: #3b59d4; }
+  @media (max-width: 700px) { .shop-detail-header { align-items: flex-start; flex-direction: column; } .promo-header { flex-direction: column; align-items: flex-start; } .promo-btn { margin-left: 0; } }
 </style>
 
 {% endblock %}

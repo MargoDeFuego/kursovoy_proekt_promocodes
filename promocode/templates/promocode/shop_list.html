@@ -1,13 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href="{{ request.META.HTTP_REFERER }}" class="back-btn">← Назад</a>
+<a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="back-btn">← Назад</a>
 <h1 class="page-title">Магазины</h1>
 
 <div class="shop-list">
   {% for shop in shops %}
-    <a href="{% url 'shop_detail' shop.pk %}" class="shop-card">
-      <strong>{{ shop.name }}</strong>
+    <a href="{% url 'shop_detail' shop.pk %}" class="shop-card" aria-label="Открыть магазин {{ shop.name }}">
+      <div class="shop-card-main">
+        {% if shop.logo %}
+          <img src="{{ shop.logo.url }}" alt="Логотип {{ shop.name }}" class="shop-logo">
+        {% endif %}
+        <div>
+          <strong class="shop-title">{{ shop.name }}</strong>
+          {% if shop.category %}
+            <span class="shop-category">{{ shop.category }}</span>
+          {% endif %}
+          {% if shop.website %}
+            <span class="shop-website">{{ shop.website }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="shop-stats">
+        <span>Активных промокодов: {{ shop.active_promo_count|default:0 }}</span>
+        <span>Всего промокодов: {{ shop.total_promo_count|default:0 }}</span>
+        <span>Кликов: {{ shop.total_click_count|default:0 }}</span>
+      </div>
     </a>
   {% empty %}
     <p>Пока нет магазинов</p>
@@ -15,26 +33,14 @@
 </div>
 
 <style>
-  .shop-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .shop-card {
-    display: block;
-    background: #fff;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    text-decoration: none;
-    color: #222;
-    transition: 0.2s ease;
-  }
-
-  .shop-card:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
-  }
+  .shop-list { display: flex; flex-direction: column; gap: 12px; }
+  .shop-card { display: flex; justify-content: space-between; gap: 14px; background: #fff; padding: 14px 16px; border-radius: 10px; border: 1px solid #ddd; text-decoration: none; color: #222; transition: 0.2s ease; }
+  .shop-card:hover { background: #f8fbff; border-color: #9bc9ff; transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
+  .shop-card-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .shop-logo { width: 54px; height: 54px; object-fit: contain; border: 1px solid #eee; border-radius: 8px; background: #fff; }
+  .shop-title { display: block; font-size: 18px; margin-bottom: 4px; }
+  .shop-category, .shop-website { display: block; font-size: 13px; color: #666; overflow-wrap: anywhere; }
+  .shop-stats { display: flex; flex-direction: column; gap: 4px; color: #555; font-size: 13px; text-align: right; min-width: 180px; }
+  @media (max-width: 700px) { .shop-card { flex-direction: column; } .shop-stats { text-align: left; min-width: auto; } }
 </style>
 {% endblock %}

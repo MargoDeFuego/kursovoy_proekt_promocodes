@@ -7,9 +7,10 @@ from typing import Any
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
+from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
@@ -88,7 +89,21 @@ def group_list(request: HttpRequest) -> HttpResponse:
 
 
 def shop_list(request: HttpRequest) -> HttpResponse:
-    shops = Shop.objects.all().order_by("name")
+    """Show stores with active promo counters and click statistics."""
+    today = now().date()
+    shops = (
+        Shop.objects.annotate(
+            active_promo_count=Count(
+                "promos",
+                filter=Q(promos__is_active=True)
+                & (Q(promos__expires_at__gte=today) | Q(promos__expires_at__isnull=True)),
+                distinct=True,
+            ),
+            total_promo_count=Count("promos", distinct=True),
+            total_click_count=Count("promos__clicks", distinct=True),
+        )
+        .order_by("name")
+    )
     return render(request, "promocode/shop_list.html", {"shops": shops})
 
 
@@ -166,6 +181,26 @@ def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "promocode/promo_detail.html", {"promo": promo, "reveal_code": True})
 
 
+@require_POST
+def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
+    """Reveal promo code from the list page and register the click."""
+    promo = get_object_or_404(Promo.objects.select_related("shop"), pk=pk)
+    if not promo.can_be_used():
+        return JsonResponse(
+            {"ok": False, "error": "Промокод недоступен или срок его действия истёк."},
+            status=400,
+        )
+
+    register_promo_click(promo, request)
+    return JsonResponse(
+        {
+            "ok": True,
+            "code": promo.code,
+            "click_count": promo.clicks.count(),
+        }
+    )
+
+
 @staff_required
 def promo_create(request: HttpRequest) -> HttpResponse:
     form = PromoForm(request.POST or None)
@@ -196,11 +231,27 @@ def promo_delete(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("promo_list")
     return render(request, "promocode/promo_confirm_delete.html", {"promo": promo})
 
-def shop_detail(request, pk):
-    shop = get_object_or_404(Shop, pk=pk)
+def shop_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    """Show store information and all active promo codes for this store."""
     today = now().date()
+    shop = get_object_or_404(
+        Shop.objects.annotate(
+            active_promo_count=Count(
+                "promos",
+                filter=Q(promos__is_active=True)
+                & (Q(promos__expires_at__gte=today) | Q(promos__expires_at__isnull=True)),
+                distinct=True,
+            ),
+            total_promo_count=Count("promos", distinct=True),
+            total_click_count=Count("promos__clicks", distinct=True),
+        ),
+        pk=pk,
+    )
     promos = (
-        Promo.objects.filter(shop=shop, is_active=True)
+        Promo.objects.select_related("shop", "created_by")
+        .prefetch_related("groups")
+        .annotate(click_count=Count("clicks", distinct=True))
+        .filter(shop=shop, is_active=True)
         .filter(Q(expires_at__gte=today) | Q(expires_at__isnull=True))
         .order_by("-created_at")
     )
