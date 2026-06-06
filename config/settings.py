@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     "import_export",
     "silk",
     "social_django",
-    "promocode",
+    "promocode.apps.PromocodeConfig",
 ]
 
 MIDDLEWARE = [

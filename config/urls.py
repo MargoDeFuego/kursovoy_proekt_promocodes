@@ -9,10 +9,7 @@ from django.urls import include, path
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    # Админка
-    path("admin/", admin.site.urls),
-
-    # Logout — разрешаем GET и POST, чтобы исключить 405
+    # 1. Твой logout — САМЫЙ ПЕРВЫЙ
     path(
         "logout/",
         auth_views.LogoutView.as_view(
@@ -22,18 +19,22 @@ urlpatterns = [
         name="logout",
     ),
 
-    # Login (без logout!)
+    # 2. Login
     path("accounts/login/", auth_views.LoginView.as_view(), name="login"),
 
-    # Select2
-    path("select2/", include("django_select2.urls")),
+    # 3. Основное приложение — ВАЖНО: ставим ПЕРЕД social-auth
+    path("", include("promocode.urls")),
 
-    # Social auth
+    # 4. Social auth — ниже, чтобы не перехватывал logout
     path("auth/", include("social_django.urls", namespace="social")),
 
-    # Основное приложение
-    path("", include("promocode.urls")),
+    # 5. Select2
+    path("select2/", include("django_select2.urls")),
+
+    # 6. Админка — всегда внизу
+    path("admin/", admin.site.urls),
 ]
+
 
 # Debug-only routes
 if settings.DEBUG:

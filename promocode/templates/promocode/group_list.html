@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="page-title">Группы промокодов</h1>
+<h1 class="page-title">Категории промокодов</h1>
 
 <div class="group-list">
   {% for group in groups %}
@@ -9,7 +9,7 @@
       {{ group.name }}
     </a>
   {% empty %}
-    <p class="empty">Группы пока не созданы</p>
+    <p class="empty">Категории пока не созданы</p>
   {% endfor %}
 </div>
 

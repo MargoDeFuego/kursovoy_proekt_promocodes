@@ -1,43 +1,140 @@
 {% extends "base.html" %}
 
+{% block title %}Вход{% endblock %}
+
 {% block content %}
-<h1 class="page-title">Вход</h1>
+<div class="auth-container">
+    <h2 class="auth-title">Вход</h2>
 
-<div class="form-card">
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+    <form method="post" class="auth-form">
+        {% csrf_token %}
 
-    <div class="form-actions">
-      <button type="submit" class="submit-btn">Войти</button>
-    </div>
-  </form>
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small class="help-text">{{ field.help_text|safe }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <div class="error-text">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="auth-btn">Войти</button>
+    </form>
+
+    <p class="auth-switch">
+        Нет аккаунта?
+        <a href="{% url 'register' %}">Создать</a>
+    </p>
 </div>
 
 <style>
-  .page-title {
-    font-size: 26px;
-    margin-bottom: 20px;
-  }
-  .form-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 20px 25px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    max-width: 400px;
-  }
-  .form-actions {
-    margin-top: 20px;
-  }
-  .submit-btn {
-    background: #4CAF50;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-  }
+    .auth-container {
+        max-width: 580px;
+        margin: 40px auto;
+        padding: 40px 50px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* центрируем весь контент */
+    }
+
+    .auth-title {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: 600;
+        width: 100%;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* центрируем поля */
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* центрируем label + input */
+    }
+
+    .form-group label {
+        width: 360px; /* выравниваем по ширине поля */
+        text-align: left;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        max-width: 360px;
+        padding: 11px 13px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    .help-text {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.45;
+        max-width: 520px;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .error-text {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #d9534f;
+        width: 360px;
+        text-align: left;
+    }
+
+    .auth-btn {
+        width: 100%;
+        max-width: 360px;
+        padding: 12px;
+        background: #4a6cf7;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .auth-btn:hover {
+        background: #3b59d4;
+    }
+
+    .auth-switch {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .auth-switch a {
+        color: #4a6cf7;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-switch a:hover {
+        text-decoration: underline;
+    }
 </style>
 {% endblock %}

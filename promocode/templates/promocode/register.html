@@ -3,16 +3,119 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<h2>Регистрация</h2>
+<div class="auth-container">
+    <h2 class="auth-title">Создание аккаунта</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+    <form method="post" class="auth-form">
+        {% csrf_token %}
 
-    <button type="submit">Создать аккаунт</button>
-</form>
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+                {{ field }}
 
-<p>Уже есть аккаунт?
-    <a href="{% url 'login' %}">Войти</a>
-</p>
+                {% if field.help_text %}
+                    <small class="help-text">{{ field.help_text|safe }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <div class="error-text">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="auth-btn">Создать аккаунт</button>
+    </form>
+
+    <p class="auth-switch">
+        Уже есть аккаунт?
+        <a href="{% url 'login' %}">Войти</a>
+    </p>
+</div>
+
+<style>
+    .auth-container {
+        max-width: 550px; /* было 420px — увеличили */
+        margin: 40px auto;
+        padding: 30px 70px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .auth-title {
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        padding-right: 30px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 11px 13px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    .help-text {
+        display: block;
+        margin-top: 8px;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.45;
+        white-space: normal; /* важно! помогает переносить длинные строки */
+    }
+
+    .error-text {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #d9534f;
+    }
+
+    .auth-btn {
+        width: 100%;
+        margin-top: 10px;
+        padding: 12px;
+        background: #4a6cf7;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .auth-btn:hover {
+        background: #3b59d4;
+    }
+
+    .auth-switch {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 14px;
+    }
+
+    .auth-switch a {
+        color: #4a6cf7;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-switch a:hover {
+        text-decoration: underline;
+    }
+</style>
+
 {% endblock %}

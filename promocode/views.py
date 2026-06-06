@@ -10,7 +10,7 @@ from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 
 from .forms import PromoForm
 from .forms_auth import RegisterForm
@@ -32,7 +32,20 @@ def register(request: HttpRequest) -> HttpResponse:
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Берём пароль из формы
+            raw_password = form.cleaned_data.get("password1")
+
+            # Авторизуем пользователя через authenticate()
+            user = authenticate(
+                request,
+                username=user.username,
+                password=raw_password
+            )
+
+            # Теперь login знает backend
             login(request, user)
+
             return redirect("promo_list")
     else:
         form = RegisterForm()
