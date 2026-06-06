@@ -29,7 +29,7 @@
     {% if promo.code %}
       {% if reveal_code or request.user.is_staff %}
         <span class="promo-code visible">{{ promo.code }}</span>
-      {% elif request.user.is_authenticated %}
+      {% elif site_user or request.user.is_authenticated %}
         <a class="code-btn" href="{% url 'promo_reveal' promo.pk %}">Показать код</a>
       {% else %}
         <a class="code-btn" href="{% url 'login' %}?next={% url 'promo_detail' promo.pk %}">Войдите, чтобы увидеть код</a>

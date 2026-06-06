@@ -4,18 +4,22 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import authenticate
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
 
+from .filters import PromoFilter
 from .forms import PromoForm
 from .forms_auth import RegisterForm
 from .models import Promo, PromoGroup, Shop
 from .services import register_promo_click
+from .auth_utils import clear_site_user, set_site_user, site_login_required
 
 
 def staff_required(function):
@@ -24,28 +28,47 @@ def staff_required(function):
 
 
 # -----------------------------
+#   АВТОРИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ САЙТА
+# -----------------------------
+def site_login(request: HttpRequest) -> HttpResponse:
+    """Log in to the public site without touching the Django admin session."""
+    next_url = request.GET.get("next") or request.POST.get("next") or "promo_list"
+
+    if request.method == "POST":
+        form = AuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            set_site_user(request, form.get_user())
+            return redirect(next_url)
+    else:
+        form = AuthenticationForm(request=request)
+
+    return render(request, "registration/login.html", {"form": form, "next": next_url})
+
+
+def site_logout(request: HttpRequest) -> HttpResponse:
+    """Log out only from the public-site account, keeping /admin/ session alive."""
+    clear_site_user(request)
+    messages.success(request, "Вы вышли из личного кабинета. Админ-панель не была разлогинена.")
+    return redirect("promo_list")
+
+
+# -----------------------------
 #   РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ
 # -----------------------------
 def register(request: HttpRequest) -> HttpResponse:
-    """Register a new user and auto-login."""
+    """Register a new user and log in only to the public site."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-
-            # Берём пароль из формы
             raw_password = form.cleaned_data.get("password1")
-
-            # Авторизуем пользователя через authenticate()
-            user = authenticate(
+            authenticated_user = authenticate(
                 request,
                 username=user.username,
-                password=raw_password
+                password=raw_password,
             )
-
-            # Теперь login знает backend
-            login(request, user)
-
+            if authenticated_user is not None:
+                set_site_user(request, authenticated_user)
             return redirect("promo_list")
     else:
         form = RegisterForm()
@@ -86,6 +109,7 @@ def group_detail(request: HttpRequest, slug: str) -> HttpResponse:
 
 
 def promo_list(request: HttpRequest) -> HttpResponse:
+    """Show active promo codes with search, django-filter form and pagination."""
     search_query = request.GET.get("q", "").strip()
     today = now().date()
     promo_qs = (
@@ -96,14 +120,32 @@ def promo_list(request: HttpRequest) -> HttpResponse:
         .filter(Q(expires_at__gte=today) | Q(expires_at__isnull=True))
         .order_by("-created_at")
     )
+
+    promo_filter = PromoFilter(request.GET or None, queryset=promo_qs)
+    promo_qs = promo_filter.qs
+
     if search_query:
         promo_qs = promo_qs.filter(
             Q(title__icontains=search_query) |
+            Q(code__icontains=search_query) |
+            Q(description__icontains=search_query) |
             Q(shop__name__icontains=search_query)
         )
+
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
     paginator = Paginator(promo_qs, 5)
     promos = paginator.get_page(request.GET.get("page"))
-    return render(request, "promocode/promo_list.html", {"promos": promos, "q": search_query})
+    return render(
+        request,
+        "promocode/promo_list.html",
+        {
+            "filter": promo_filter,
+            "filter_querystring": query_params.urlencode(),
+            "promos": promos,
+            "q": search_query,
+        },
+    )
 
 
 def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
@@ -116,7 +158,7 @@ def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "promocode/promo_detail.html", {"promo": promo})
 
 
-@login_required
+@site_login_required
 def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
     promo = get_object_or_404(Promo.objects.select_related("shop"), pk=pk)
     if promo.can_be_used():

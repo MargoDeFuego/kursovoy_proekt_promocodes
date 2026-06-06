@@ -131,22 +131,27 @@
         </div>
 
         <div class="nav">
-            {% if user.is_authenticated %}
+            {% if site_user %}
                 <div class="auth-info">
-                    <span>Вы: <strong>{{ user.username }}</strong></span>
+                    <span>Личный кабинет: <strong>{{ site_user.username }}</strong></span>
+                    <span class="role user">Пользователь</span>
 
-                    {% if user.is_staff %}
-                        <span class="role admin">Администратор</span>
+                    {% if request.user.is_staff %}
+                        <span class="role admin">Админ: {{ request.user.username }}</span>
                         <a href="/admin/" class="btn-admin">Админка</a>
-                    {% else %}
-                        <span class="role user">Пользователь</span>
                     {% endif %}
 
-                    <a href="{% url 'logout' %}">Выйти</a>
+                    <a href="{% url 'logout' %}">Выйти из личного кабинета</a>
                 </div>
             {% else %}
-                <a href="{% url 'login' %}">Войти</a>
-                <a href="{% url 'register' %}">Регистрация</a>
+                <div class="auth-info">
+                    {% if request.user.is_staff %}
+                        <span class="role admin">Админ: {{ request.user.username }}</span>
+                        <a href="/admin/" class="btn-admin">Админка</a>
+                    {% endif %}
+                    <a href="{% url 'login' %}">Войти</a>
+                    <a href="{% url 'register' %}">Регистрация</a>
+                </div>
             {% endif %}
         </div>
 

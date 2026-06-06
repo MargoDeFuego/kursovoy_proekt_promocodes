@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 
-
 <h1 class="page-title">Промокоды магазинов</h1>
 
 {% if request.user.is_staff %}
@@ -9,6 +8,74 @@
   <a href="{% url 'promo_create' %}">➕ Добавить промокод</a>
 </p>
 {% endif %}
+
+<section class="filter-panel" aria-labelledby="filter-title">
+  <h2 id="filter-title" class="filter-title">Фильтр промокодов</h2>
+
+  <form method="get" class="filter-form">
+    <div class="filter-field filter-field-wide">
+      <label for="id_q">Поиск</label>
+      <input
+        type="search"
+        name="q"
+        id="id_q"
+        value="{{ q }}"
+        placeholder="Название, код, описание или магазин"
+      >
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.shop.id_for_label }}">{{ filter.form.shop.label }}</label>
+      {{ filter.form.shop }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.category.id_for_label }}">{{ filter.form.category.label }}</label>
+      {{ filter.form.category }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.manufacturer.id_for_label }}">{{ filter.form.manufacturer.label }}</label>
+      {{ filter.form.manufacturer }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.discount_min.id_for_label }}">{{ filter.form.discount_min.label }}</label>
+      {{ filter.form.discount_min }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.discount_max.id_for_label }}">{{ filter.form.discount_max.label }}</label>
+      {{ filter.form.discount_max }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.price_min.id_for_label }}">{{ filter.form.price_min.label }}</label>
+      {{ filter.form.price_min }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.price_max.id_for_label }}">{{ filter.form.price_max.label }}</label>
+      {{ filter.form.price_max }}
+    </div>
+
+    <div class="filter-field">
+      <label for="{{ filter.form.expires_to.id_for_label }}">{{ filter.form.expires_to.label }}</label>
+      {{ filter.form.expires_to }}
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="filter-btn">Применить фильтр</button>
+      <a href="{% url 'promo_list' %}" class="reset-btn">Сбросить</a>
+    </div>
+  </form>
+
+  {% if filter.form.errors %}
+    <div class="filter-errors">
+      {{ filter.form.errors }}
+    </div>
+  {% endif %}
+</section>
 
 <div class="promo-list">
   {% for promo in promos %}
@@ -46,9 +113,23 @@
 
     </div>
   {% empty %}
-    <p class="empty">Нет активных промокодов</p>
+    <p class="empty">Промокоды по выбранным условиям не найдены.</p>
   {% endfor %}
 </div>
+
+{% if promos.paginator.num_pages > 1 %}
+  <nav class="pagination" aria-label="Навигация по страницам">
+    {% if promos.has_previous %}
+      <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page={{ promos.previous_page_number }}">← Назад</a>
+    {% endif %}
+
+    <span>Страница {{ promos.number }} из {{ promos.paginator.num_pages }}</span>
+
+    {% if promos.has_next %}
+      <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page={{ promos.next_page_number }}">Вперёд →</a>
+    {% endif %}
+  </nav>
+{% endif %}
 
 <style>
   .page-title {
@@ -67,6 +148,82 @@
 
   .add-btn a:hover {
     background: #45a049;
+  }
+
+  .filter-panel {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .filter-title {
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+
+  .filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+
+  .filter-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .filter-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 5px;
+  }
+
+  .filter-field input,
+  .filter-field select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    background: white;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .filter-btn,
+  .reset-btn {
+    display: inline-block;
+    border: 0;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .filter-btn {
+    background: #0077cc;
+    color: white;
+  }
+
+  .reset-btn {
+    background: #eeeeee;
+    color: #333;
+  }
+
+  .filter-errors {
+    margin-top: 12px;
+    color: #b00020;
   }
 
   .promo-list {
@@ -93,6 +250,11 @@
     margin: 0;
     font-size: 18px;
     color: #444;
+  }
+
+  .promo-meta {
+    color: #555;
+    font-size: 14px;
   }
 
   .promo-title {
@@ -157,6 +319,20 @@
   .empty {
     color: #777;
     font-style: italic;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 20px;
+    align-items: center;
+  }
+
+  .pagination a {
+    color: #0077cc;
+    font-weight: bold;
+    text-decoration: none;
   }
 </style>
 

@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 
 from .models import Promo, PromoClick
+from .auth_utils import get_site_user
 
 User = get_user_model()
 
@@ -29,7 +30,8 @@ def get_client_ip(request: HttpRequest) -> str | None:
 
 def register_promo_click(promo: Promo, request: HttpRequest) -> PromoClick:
     """Create analytic click row and increment usage counter when promo is revealed."""
-    user = request.user if request.user.is_authenticated else None
+    site_user = get_site_user(request)
+    user = site_user or (request.user if request.user.is_authenticated else None)
     click = PromoClick.objects.create(
         promo=promo,
         user=user,

@@ -6,23 +6,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.contrib.auth import views as auth_views
+from promocode import views as promocode_views
 
 urlpatterns = [
-    # 1. Твой logout — САМЫЙ ПЕРВЫЙ
-    path(
-        "logout/",
-        auth_views.LogoutView.as_view(
-            next_page="promo_list",
-            http_method_names=["get", "post"]
-        ),
-        name="logout",
-    ),
+    # Logout for the public site only: does not flush Django admin session.
+    path("logout/", promocode_views.site_logout, name="logout"),
 
-    # 2. Login
-    path("accounts/login/", auth_views.LoginView.as_view(), name="login"),
+    # Login for the public site only: stores user in a separate session key.
+    path("accounts/login/", promocode_views.site_login, name="login"),
 
-    # 3. Основное приложение — ВАЖНО: ставим ПЕРЕД social-auth
+    # Main app.
     path("", include("promocode.urls")),
 
     # 4. Social auth — ниже, чтобы не перехватывал logout
