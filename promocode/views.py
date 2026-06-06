@@ -195,3 +195,39 @@ def promo_delete(request: HttpRequest, pk: int) -> HttpResponse:
         promo.delete()
         return redirect("promo_list")
     return render(request, "promocode/promo_confirm_delete.html", {"promo": promo})
+
+def shop_detail(request, pk):
+    shop = get_object_or_404(Shop, pk=pk)
+    today = now().date()
+    promos = (
+        Promo.objects.filter(shop=shop, is_active=True)
+        .filter(Q(expires_at__gte=today) | Q(expires_at__isnull=True))
+        .order_by("-created_at")
+    )
+    return render(request, "promocode/shop_detail.html", {"shop": shop, "promos": promos})
+
+
+@staff_required
+def shop_create(request):
+    form = ShopForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect("shop_list")
+    return render(request, "promocode/shop_form.html", {"form": form})
+
+@staff_required
+def shop_update(request, pk):
+    shop = get_object_or_404(Shop, pk=pk)
+    form = ShopForm(request.POST or None, instance=shop)
+    if form.is_valid():
+        form.save()
+        return redirect("shop_detail", pk=pk)
+    return render(request, "promocode/shop_form.html", {"form": form})
+
+@staff_required
+def shop_delete(request, pk):
+    shop = get_object_or_404(Shop, pk=pk)
+    if request.method == "POST":
+        shop.delete()
+        return redirect("shop_list")
+    return render(request, "promocode/shop_confirm_delete.html", {"shop": shop})

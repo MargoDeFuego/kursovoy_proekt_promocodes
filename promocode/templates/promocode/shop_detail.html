@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ shop.name }} — промокоды{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ shop.name }}</h1>
+
+{% if promos %}
+<a href="{{ request.META.HTTP_REFERER }}" class="back-btn">← Назад</a>
+    <div class="promo-list">
+        {% for promo in promos %}
+            <div class="promo-card">
+                <div class="promo-header">
+                    <h3 class="promo-title">{{ promo.title }}</h3>
+                    {% if promo.expires_at %}
+                        <span class="promo-expire">
+                            до {{ promo.expires_at }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <p class="promo-description">
+                    {{ promo.description|truncatewords:20 }}
+                </p>
+
+                <div class="promo-footer">
+                    <a href="{% url 'promo_detail' promo.pk %}" class="promo-btn">Подробнее</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>В этом магазине пока нет активных промокодов.</p>
+{% endif %}
+
+<style>
+    .promo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        margin-top: 25px;
+    }
+
+    .promo-card {
+        background: #fff;
+        padding: 18px 22px;
+        border-radius: 10px;
+        border: 1px solid #e3e3e3;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        transition: 0.25s ease;
+    }
+
+    .promo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: #c9c9c9;
+    }
+
+    .promo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .promo-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .promo-expire {
+        font-size: 14px;
+        color: #777;
+    }
+
+    .promo-description {
+        margin: 12px 0;
+        color: #444;
+        line-height: 1.45;
+    }
+
+    .promo-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .promo-clicks {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .promo-btn {
+        padding: 8px 14px;
+        background: #4a6cf7;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    .promo-btn:hover {
+        background: #3b59d4;
+    }
+</style>
+
+{% endblock %}

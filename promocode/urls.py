@@ -18,6 +18,12 @@ urlpatterns = [
 
     # Магазины
     path("shops/", views.shop_list, name="shop_list"),
+    path("shops/<int:pk>/", views.shop_detail, name="shop_detail"),
+    path("shops/add/", views.shop_create, name="shop_create"),
+    path("shops/<int:pk>/edit/", views.shop_update, name="shop_update"),
+    path("shops/<int:pk>/delete/", views.shop_delete, name="shop_delete"),
+
+
 
     # Промокоды
     path("promos/", views.promo_list, name="promo_list"),
@@ -26,6 +32,8 @@ urlpatterns = [
     path("promo/<int:pk>/reveal/", views.promo_reveal, name="promo_reveal"),
     path("promo/<int:pk>/edit/", views.promo_update, name="promo_update"),
     path("promo/<int:pk>/delete/", views.promo_delete, name="promo_delete"),
+
+    
 ]
 
 # API

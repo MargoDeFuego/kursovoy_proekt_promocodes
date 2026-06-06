@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+<a href="{{ request.META.HTTP_REFERER }}" class="back-btn">← Назад</a>
 <h1 class="page-title">Магазины</h1>
 
 <div class="shop-list">
   {% for shop in shops %}
-    <div class="shop-card">
+    <a href="{% url 'shop_detail' shop.pk %}" class="shop-card">
       <strong>{{ shop.name }}</strong>
-    </div>
+    </a>
   {% empty %}
     <p>Пока нет магазинов</p>
   {% endfor %}
@@ -21,10 +22,19 @@
   }
 
   .shop-card {
+    display: block;
     background: #fff;
     padding: 12px 15px;
     border-radius: 8px;
     border: 1px solid #ddd;
+    text-decoration: none;
+    color: #222;
+    transition: 0.2s ease;
+  }
+
+  .shop-card:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
   }
 </style>
 {% endblock %}
