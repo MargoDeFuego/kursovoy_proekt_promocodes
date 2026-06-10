@@ -1,4 +1,4 @@
-"""Project package."""
+"""Пакет проекта."""
 
 from .celery import app as celery_app
 

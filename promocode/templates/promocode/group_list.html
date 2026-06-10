@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 
+
+<!-- Заголовок страницы -->
 <h1 class="page-title">Категории промокодов</h1>
 
+<!-- Список категорий -->
 <div class="group-list">
   {% for group in groups %}
     <a class="group-item" href="{% url 'group_detail' group.slug %}">
       {{ group.name }}
     </a>
   {% empty %}
+    <!-- Если категорий нет -->
     <p class="empty">Категории пока не созданы</p>
   {% endfor %}
 </div>

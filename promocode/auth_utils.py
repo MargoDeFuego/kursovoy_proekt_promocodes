@@ -1,8 +1,8 @@
-"""Separate front-site authentication helpers.
+"""Вспомогательные функции авторизации для публичного сайта.
 
-The Django admin uses the standard Django auth session (``request.user``).
-The public promo-code site uses a separate session key so that logging out
-from the personal account does not destroy the administrator session.
+Админ‑панель Django использует стандартную сессию аутентификации (``request.user``).
+Публичная часть сайта промокодов использует отдельный ключ сессии, чтобы выход
+из личного кабинета не разлогинивал администратора.
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ F = TypeVar("F", bound=Callable[..., HttpResponse])
 
 
 def get_site_user(request: HttpRequest) -> Any | None:
-    """Return user stored in the public-site session or ``None``.
+    """Вернуть пользователя, сохранённого в сессии публичного сайта, или ``None``.
 
-    Invalid/stale user ids are removed from the session automatically.
+    Некорректные или устаревшие ID пользователей автоматически удаляются из сессии.
     """
     user_id = request.session.get(SITE_USER_SESSION_KEY)
     if not user_id:
@@ -38,26 +38,26 @@ def get_site_user(request: HttpRequest) -> Any | None:
 
 
 def set_site_user(request: HttpRequest, user: Any) -> None:
-    """Store public-site user without changing Django admin authentication."""
+    """Сохранить пользователя публичного сайта, не затрагивая админ‑сессию Django."""
     request.session[SITE_USER_SESSION_KEY] = user.pk
     request.session.modified = True
 
 
 def clear_site_user(request: HttpRequest) -> None:
-    """Log out only from the public-site account."""
+    """Выйти только из аккаунта публичного сайта."""
     request.session.pop(SITE_USER_SESSION_KEY, None)
     request.session.modified = True
 
 
 def get_public_user(request: HttpRequest) -> Any | None:
-    """Return the user for the public site.
+    """Вернуть пользователя публичного сайта.
 
-    The public site may authenticate users in two ways:
-    * regular username/password form stores ``site_user_id``;
-    * Google OAuth authenticates through Django's standard ``request.user``.
+    Публичная часть может аутентифицировать пользователей двумя способами:
+    * обычная форма логина сохраняет ``site_user_id`` в сессии;
+    * Google OAuth использует стандартный ``request.user``.
 
-    Staff/admin users are intentionally not treated as a public-site user here,
-    so the admin session stays separate from the shop user session.
+    Сотрудники/админы намеренно НЕ считаются пользователями публичного сайта,
+    чтобы их админ‑сессия не смешивалась с пользовательской.
     """
     site_user = get_site_user(request)
     if site_user is not None:
@@ -75,15 +75,15 @@ def get_public_user(request: HttpRequest) -> Any | None:
 
 
 def site_user_is_authenticated(request: HttpRequest) -> bool:
-    """Return ``True`` when a public-site user is logged in."""
+    """Вернуть ``True``, если пользователь публичного сайта авторизован."""
     return get_public_user(request) is not None
 
 
 def site_login_required(view_func: F) -> F:
-    """Require either public-site login or standard Django admin login.
+    """Требовать авторизацию публичного сайта или вход в Django‑админку.
 
-    Staff users authenticated in Django admin should still be able to reveal
-    promo codes without using a separate public-site account.
+    Администраторы, вошедшие в админ‑панель, также могут открывать промокоды
+    без отдельного логина на публичном сайте.
     """
 
     @wraps(view_func)

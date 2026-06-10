@@ -1,4 +1,4 @@
-"""Django settings for promo-code project."""
+"""Настройки Django для проекта промокодов."""
 
 from __future__ import annotations
 

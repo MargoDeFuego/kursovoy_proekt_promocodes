@@ -1,4 +1,4 @@
-"""URL routes for promo-code application and API."""
+"""URL‑маршруты для приложения промокодов и его API."""
 
 from __future__ import annotations
 

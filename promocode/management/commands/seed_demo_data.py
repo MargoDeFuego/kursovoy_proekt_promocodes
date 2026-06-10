@@ -1,4 +1,4 @@
-"""Create demo shops, groups and promo codes for local development."""
+"""Создаёт демонстрационные магазины, группы и промокоды для локальной разработки."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ from promocode.models import Promo, PromoGroup, Shop
 
 
 class Command(BaseCommand):
-    """Fill database with visible demo data for promo-code pages."""
+    """Заполняет базу данных демонстрационными данными для страниц промокодов."""
 
-    help = "Create demo shops, groups and promo codes. Safe to run multiple times."
+    help = "Создаёт демонстрационные магазины, группы и промокоды. Можно запускать многократно."
 
     def handle(self, *args: object, **options: object) -> None:
-        """Create or update demo records."""
+        """Создаёт или обновляет демонстрационные записи."""
         User = get_user_model()
         admin = User.objects.filter(is_staff=True).first()
 
@@ -107,4 +107,4 @@ class Command(BaseCommand):
             promo.groups.set(groups)
             created_or_updated += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Demo data ready: {created_or_updated} promo codes."))
+        self.stdout.write(self.style.SUCCESS(f"Демонстрационные данные готовы: {created_or_updated} промокодов."))

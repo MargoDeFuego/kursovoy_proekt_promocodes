@@ -1,4 +1,4 @@
-"""Template context processors for the promo-code site."""
+"""Контекстные процессоры для публичной части сайта промокодов."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from .auth_utils import get_public_user
 
 
 def site_auth(request: HttpRequest) -> dict[str, object]:
-    """Expose public-site user separately from Django admin ``request.user``."""
+    """Передать в шаблоны пользователя публичного сайта отдельно от Django admin ``request.user``."""
     site_user = get_public_user(request)
     return {
         "site_user": site_user,

@@ -1,4 +1,4 @@
-"""Business services for promo-code lifecycle operations."""
+"""Бизнес‑логика для операций жизненного цикла промокодов."""
 
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ User = get_user_model()
 
 
 def deactivate_expired_promos() -> int:
-    """Deactivate all active promo codes whose expiration date is in the past."""
+    """Деактивировать все активные промокоды с истёкшим сроком действия."""
     return Promo.objects.filter(expires_at__lt=timezone.localdate(), is_active=True).update(is_active=False)
 
 
 def get_client_ip(request: HttpRequest) -> str | None:
-    """Return client IP address from request headers."""
+    """Вернуть IP‑адрес клиента из заголовков запроса."""
     forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
@@ -29,7 +29,7 @@ def get_client_ip(request: HttpRequest) -> str | None:
 
 
 def register_promo_click(promo: Promo, request: HttpRequest) -> PromoClick:
-    """Create analytic click row and increment usage counter when promo is revealed."""
+    """Создать запись клика и атомарно увеличить счётчик использований."""
     site_user = get_site_user(request)
     user = site_user or (request.user if request.user.is_authenticated else None)
     click = PromoClick.objects.create(
@@ -43,14 +43,14 @@ def register_promo_click(promo: Promo, request: HttpRequest) -> PromoClick:
 
 
 def models_increment(field_name: str) -> Any:
-    """Return database expression for atomic increment."""
+    """Вернуть выражение F() для атомарного инкремента поля."""
     from django.db.models import F
 
     return F(field_name) + 1
 
 
 def visible_promos_for_user(user: Any) -> QuerySet[Promo]:
-    """Return promo queryset according to role rules."""
+    """Вернуть queryset промокодов согласно правилам ролей."""
     qs = Promo.objects.select_related("shop", "created_by").prefetch_related("groups")
     if getattr(user, "is_staff", False) or getattr(user, "is_superuser", False):
         return qs

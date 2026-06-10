@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 
-
+<!-- Заголовок категории -->
 <h1 class="page-title">{{ group.name }}</h1>
 
+<!-- Ссылка назад ко всем категориям -->
 <p class="back-link">
   <a href="{% url 'group_list' %}">← Все категории</a>
 </p>
 
+<!-- Список промокодов -->
 <div class="promo-list">
   {% for promo in promos %}
     <div class="promo-card">
 
+      <!-- Логотип магазина -->
       {% if promo.shop.logo %}
         <img
           src="{{ promo.shop.logo.url }}"
@@ -20,18 +23,21 @@
         >
       {% endif %}
 
+      <!-- Название магазина -->
       <h3 class="shop-name">{{ promo.shop.name }}</h3>
-
+      <!-- Метаданные промокода -->
       <p class="promo-meta">Скидка: {{ promo.discount_percent }}% · Минимальный заказ: {{ promo.min_order_amount }} · Клики: {{ promo.click_count|default:0 }}</p>
-
+      <!-- Заголовок промокода -->
       <a class="promo-title" href="{% url 'promo_detail' promo.pk %}">
         {{ promo.title }}
       </a>
-
+      
+      <!-- Описание промокода -->
       {% if promo.description %}
         <p class="promo-desc">{{ promo.description }}</p>
       {% endif %}
 
+      <!-- Блок с кнопкой и кодом -->
       <div class="promo-footer">
         {% if promo.code %}
           <button class="code-btn" onclick="this.nextElementSibling.classList.toggle('visible')" aria-label="Показать промокод">
@@ -52,6 +58,7 @@
   {% endfor %}
 </div>
 
+<!-- Пагинация -->
 {% if promos.has_other_pages %}
   <div class="pagination">
     {% if promos.has_previous %}

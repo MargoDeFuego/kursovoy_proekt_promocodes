@@ -2,18 +2,23 @@
 
 {% block content %}
 
+<!-- Заголовок страницы -->
 <h1 class="page-title">Удалить промокод</h1>
 
+<!-- Карточка подтверждения удаления -->
 <div class="confirm-card">
   <p class="confirm-text">
     Вы действительно хотите удалить<br>
     <strong>{{ promo.title }}</strong>?
   </p>
 
+  <!-- Форма подтверждения -->
   <form method="post" class="confirm-actions">
     {% csrf_token %}
 
+    <!-- Кнопка удаления -->
     <button type="submit" class="delete-btn">Удалить</button>
+    <!-- Ссылка отмены -->
     <a href="{% url 'promo_detail' promo.pk %}" class="cancel-link">Отмена</a>
   </form>
 </div>

@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- Заголовок страницы: название промокода -->
 <h1 class="page-title">{{ promo.title }}</h1>
 
+<!-- Ссылка назад к списку промокодов -->
 <p class="back-link">
   <a href="{% url 'promo_list' %}">← К списку</a>
 </p>
 
+<!-- Карточка промокода -->
 <div class="promo-card">
 
+  <!-- Логотип магазина -->
   {% if promo.shop.logo %}
     <img
       src="{{ promo.shop.logo.url }}"
@@ -17,21 +21,28 @@
     >
   {% endif %}
 
+  <!-- Название магазина -->
   <h3 class="shop-name">{{ promo.shop.name }}</h3>
 
+  <!-- Метаданные промокода -->
   <p class="promo-meta">Скидка: {{ promo.discount_percent }}% · Минимальный заказ: {{ promo.min_order_amount }} · Использовано: {{ promo.used_count }}{% if promo.usage_limit %}/{{ promo.usage_limit }}{% endif %}</p>
 
+  <!-- Описание промокода -->
   {% if promo.description %}
     <p class="promo-desc">{{ promo.description }}</p>
   {% endif %}
 
+  <!-- Блок с промокодом -->
   <div class="promo-footer">
     {% if promo.code %}
       {% if reveal_code or request.user.is_staff %}
+        <!-- Код виден сразу -->
         <span class="promo-code visible">{{ promo.code }}</span>
       {% elif site_user or request.user.is_authenticated %}
+        <!-- Авторизованный пользователь: кнопка показать код -->
         <a class="code-btn" href="{% url 'promo_reveal' promo.pk %}">Показать код</a>
       {% else %}
+        <!-- Гость: просьба войти -->
         <a class="code-btn" href="{% url 'login' %}?next={% url 'promo_detail' promo.pk %}">Войдите, чтобы увидеть код</a>
       {% endif %}
     {% else %}
@@ -41,6 +52,7 @@
 
 </div>
 
+<!-- Действия администратора -->
 {% if request.user.is_staff %}
 <div class="actions">
   <a href="{% url 'promo_update' promo.pk %}">Редактировать</a>

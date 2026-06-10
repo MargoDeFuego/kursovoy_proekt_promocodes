@@ -1,4 +1,4 @@
-"""Management command to deactivate expired promo codes."""
+"""Команда управления для деактивации просроченных промокодов."""
 
 from __future__ import annotations
 
@@ -8,11 +8,12 @@ from promocode.services import deactivate_expired_promos
 
 
 class Command(BaseCommand):
-    """Deactivate expired promo codes."""
+    """Деактивирует просроченные промокоды."""
 
     help = "Деактивирует истёкшие промокоды"
 
     def handle(self, *args: object, **options: object) -> None:
-        """Run deactivation and print result."""
+        """Запускает деактивацию и выводит результат."""
+        
         count = deactivate_expired_promos()
         self.stdout.write(self.style.SUCCESS(f"Деактивировано промокодов: {count}"))

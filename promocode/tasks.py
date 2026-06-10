@@ -1,4 +1,4 @@
-"""Celery tasks for promo-code project."""
+"""Celery‑задачи для проекта промокодов."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from .services import deactivate_expired_promos
 
 @shared_task
 def deactivate_expired_promos_task() -> int:
-    """Celery task: deactivate expired active promo codes."""
+    """Celery‑задача: деактивировать просроченные активные промокоды."""
     count = deactivate_expired_promos()
     send_expiring_promos_report.delay("test@example.com")
     return count
@@ -21,7 +21,7 @@ def deactivate_expired_promos_task() -> int:
 
 @shared_task
 def send_expiring_promos_report(email: str) -> int:
-    """Send report about promo codes expiring within 7 days via Mailhog/SMPP backend."""
+    """Отправить отчёт о промокодах, срок действия которых истекает в ближайшие 7 дней."""
     today = timezone.localdate()
     limit = today + timezone.timedelta(days=7)
     promos = (

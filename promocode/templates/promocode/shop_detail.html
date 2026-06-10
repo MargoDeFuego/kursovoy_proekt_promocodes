@@ -3,9 +3,13 @@
 {% block title %}{{ shop.name }} — промокоды{% endblock %}
 
 {% block content %}
+
+<!-- Кнопка назад -->
 <a href="{% url 'shop_list' %}" class="back-btn">← К списку магазинов</a>
 
+<!-- Карточка магазина -->
 <section class="shop-detail-card">
+  <!-- Шапка магазина: логотип + название + категория + сайт -->
   <div class="shop-detail-header">
     {% if shop.logo %}
       <img src="{{ shop.logo.url }}" alt="Логотип {{ shop.name }}" class="shop-logo-large">
@@ -24,6 +28,7 @@
     </div>
   </div>
 
+  <!-- Статистика магазина -->
   <div class="shop-stats-grid">
     <div class="stat-card">
       <span class="stat-value">{{ shop.active_promo_count|default:0 }}</span>
@@ -40,12 +45,15 @@
   </div>
 </section>
 
+<!-- Заголовок списка промокодов -->
 <h2 class="section-title">Промокоды магазина</h2>
 
+<!-- Список промокодов -->
 {% if promos %}
   <div class="promo-list">
     {% for promo in promos %}
       <article class="promo-card">
+        <!-- Заголовок промокода -->
         <div class="promo-header">
           <h3 class="promo-title">
             <a href="{% url 'promo_detail' promo.pk %}">{{ promo.title }}</a>
@@ -57,10 +65,12 @@
           {% endif %}
         </div>
 
+        <!-- Описание -->
         {% if promo.description %}
           <p class="promo-description">{{ promo.description|truncatewords:24 }}</p>
         {% endif %}
 
+        <!-- Группы промокода -->
         {% if promo.groups.exists %}
           <div class="promo-groups">
             {% for group in promo.groups.all %}
@@ -69,16 +79,19 @@
           </div>
         {% endif %}
 
+        <!-- Нижняя панель промокода -->
         <div class="promo-footer">
           <span>Скидка: {{ promo.discount_percent }}%</span>
           <span>Минимальный заказ: {{ promo.min_order_amount }}</span>
           <span>Клики: {{ promo.click_count|default:0 }}</span>
+          <!-- Кнопка перехода -->
           <a href="{% url 'promo_detail' promo.pk %}" class="promo-btn">Подробнее</a>
         </div>
       </article>
     {% endfor %}
   </div>
 {% else %}
+  <!-- Если промокодов нет -->
   <p>В этом магазине пока нет активных промокодов.</p>
 {% endif %}
 

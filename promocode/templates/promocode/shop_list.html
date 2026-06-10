@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<!-- Кнопка назад (возврат на предыдущую страницу или на главную) -->
 <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="back-btn">← Назад</a>
+<!-- Заголовок страницы -->
 <h1 class="page-title">Магазины</h1>
 
+<!-- Список магазинов -->
 <div class="shop-list">
   {% for shop in shops %}
+    <!-- Карточка магазина -->
     <a href="{% url 'shop_detail' shop.pk %}" class="shop-card" aria-label="Открыть магазин {{ shop.name }}">
+      <!-- Основная часть карточки: логотип + название + категория + сайт -->
       <div class="shop-card-main">
         {% if shop.logo %}
           <img src="{{ shop.logo.url }}" alt="Логотип {{ shop.name }}" class="shop-logo">
@@ -21,6 +27,7 @@
           {% endif %}
         </div>
       </div>
+      <!-- Статистика магазина -->
       <div class="shop-stats">
         <span>Активных промокодов: {{ shop.active_promo_count|default:0 }}</span>
         <span>Всего промокодов: {{ shop.total_promo_count|default:0 }}</span>
@@ -28,6 +35,7 @@
       </div>
     </a>
   {% empty %}
+    <!-- Если магазинов нет -->
     <p>Пока нет магазинов</p>
   {% endfor %}
 </div>

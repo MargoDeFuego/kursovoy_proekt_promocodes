@@ -1,4 +1,4 @@
-"""HTML views for promo-code catalogue."""
+"""HTML‑представления для каталога промокодов."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from .auth_utils import clear_site_user, get_public_user, set_site_user, site_lo
 
 
 def staff_required(function):
-    """Require staff user for promo management actions."""
+    """Разрешить доступ только сотрудникам (is_staff)."""
     return user_passes_test(lambda user: user.is_authenticated and user.is_staff)(function)
 
 
@@ -32,7 +32,7 @@ def staff_required(function):
 #   АВТОРИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ САЙТА
 # -----------------------------
 def site_login(request: HttpRequest) -> HttpResponse:
-    """Log in to the public site without touching the Django admin session."""
+    """Войти на публичный сайт, не затрагивая сессию Django‑админки."""
     next_url = request.GET.get("next") or request.POST.get("next") or "promo_list"
 
     if request.method == "POST":
@@ -47,7 +47,7 @@ def site_login(request: HttpRequest) -> HttpResponse:
 
 
 def site_logout(request: HttpRequest) -> HttpResponse:
-    """Log out from the public site without destroying the staff admin session."""
+    """Выйти из публичного аккаунта, не разлогинивая администратора."""
     should_logout_django_user = request.user.is_authenticated and not request.user.is_staff
 
     clear_site_user(request)
@@ -62,7 +62,7 @@ def site_logout(request: HttpRequest) -> HttpResponse:
 #   РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ
 # -----------------------------
 def register(request: HttpRequest) -> HttpResponse:
-    """Register a new user and log in only to the public site."""
+    """Зарегистрировать нового пользователя и авторизовать его только на публичном сайте."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -87,6 +87,7 @@ def register(request: HttpRequest) -> HttpResponse:
 # -----------------------------
 
 def group_list(request: HttpRequest) -> HttpResponse:
+    """Показать список групп промокодов с количеством активных акций."""
     groups = PromoGroup.objects.annotate(
         promo_count=Count("promos", filter=Q(promos__is_active=True))
     ).order_by("name")
@@ -94,7 +95,7 @@ def group_list(request: HttpRequest) -> HttpResponse:
 
 
 def shop_list(request: HttpRequest) -> HttpResponse:
-    """Show stores with active promo counters and click statistics."""
+    """Показать магазины с количеством активных промокодов и статистикой кликов."""
     today = now().date()
     shops = (
         Shop.objects.annotate(
@@ -113,6 +114,7 @@ def shop_list(request: HttpRequest) -> HttpResponse:
 
 
 def group_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    """Показать промокоды выбранной группы."""
     group = get_object_or_404(PromoGroup, slug=slug)
     today = now().date()
     promo_qs = (
@@ -129,7 +131,7 @@ def group_detail(request: HttpRequest, slug: str) -> HttpResponse:
 
 
 def promo_list(request: HttpRequest) -> HttpResponse:
-    """Show active promo codes with search, django-filter form and pagination."""
+    """Показать активные промокоды с поиском, фильтрами и пагинацией."""
     search_query = request.GET.get("q", "").strip()
     today = now().date()
     promo_qs = (
@@ -169,6 +171,7 @@ def promo_list(request: HttpRequest) -> HttpResponse:
 
 
 def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    """Показать подробности промокода."""
     promo = get_object_or_404(
         Promo.objects.select_related("shop", "created_by")
         .prefetch_related("groups")
@@ -180,6 +183,7 @@ def promo_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @site_login_required
 def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
+    """Раскрыть промокод и зарегистрировать клик."""
     promo = get_object_or_404(Promo.objects.select_related("shop"), pk=pk)
     if promo.can_be_used():
         register_promo_click(promo, request)
@@ -188,8 +192,7 @@ def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @require_POST
 def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
-    """Reveal promo code from the list page and register the click.""" 
-
+    """AJAX‑раскрытие промокода со страницы списка.""" 
     # Блокируем гостей, но разрешаем оба варианта входа:
     # обычный вход сайта через site_user_id и Google OAuth через request.user.
     if get_public_user(request) is None and not (request.user.is_authenticated and request.user.is_staff):
@@ -220,6 +223,7 @@ def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
 
 @staff_required
 def promo_create(request: HttpRequest) -> HttpResponse:
+    """Создать новый промокод (только для сотрудников)."""
     form = PromoForm(request.POST or None)
     if form.is_valid():
         promo = form.save(commit=False)
@@ -232,6 +236,7 @@ def promo_create(request: HttpRequest) -> HttpResponse:
 
 @staff_required
 def promo_update(request: HttpRequest, pk: int) -> HttpResponse:
+    """Редактировать промокод."""
     promo = get_object_or_404(Promo, pk=pk)
     form = PromoForm(request.POST or None, instance=promo)
     if form.is_valid():
@@ -242,6 +247,7 @@ def promo_update(request: HttpRequest, pk: int) -> HttpResponse:
 
 @staff_required
 def promo_delete(request: HttpRequest, pk: int) -> HttpResponse:
+    """Удалить промокод."""
     promo = get_object_or_404(Promo, pk=pk)
     if request.method == "POST":
         promo.delete()
@@ -249,7 +255,7 @@ def promo_delete(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "promocode/promo_confirm_delete.html", {"promo": promo})
 
 def shop_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    """Show store information and all active promo codes for this store."""
+    """Показать информацию о магазине и его активные промокоды."""
     today = now().date()
     shop = get_object_or_404(
         Shop.objects.annotate(
@@ -277,6 +283,7 @@ def shop_detail(request: HttpRequest, pk: int) -> HttpResponse:
 
 @staff_required
 def shop_create(request):
+    """Создать магазин."""
     form = ShopForm(request.POST or None)
     if form.is_valid():
         form.save()
@@ -285,6 +292,7 @@ def shop_create(request):
 
 @staff_required
 def shop_update(request, pk):
+    """Редактировать магазин."""
     shop = get_object_or_404(Shop, pk=pk)
     form = ShopForm(request.POST or None, instance=shop)
     if form.is_valid():
@@ -294,6 +302,7 @@ def shop_update(request, pk):
 
 @staff_required
 def shop_delete(request, pk):
+    """Удалить магазин."""
     shop = get_object_or_404(Shop, pk=pk)
     if request.method == "POST":
         shop.delete()

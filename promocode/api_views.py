@@ -1,4 +1,4 @@
-"""API views for promo-code catalogue."""
+"""API‑представления для каталога промокодов."""
 
 from __future__ import annotations
 
@@ -21,10 +21,10 @@ from .services import register_promo_click, visible_promos_for_user
 
 
 class PromoRolePermission(permissions.BasePermission):
-    """Role permissions: admins manage all, authenticated users reveal/click, guests read active promos."""
+     """Права доступа: админы управляют всем, авторизованные пользователи могут открывать/кликать, гости — только читать активные промокоды."""
 
     def has_permission(self, request: Request, view: Any) -> bool:
-        """Check permission for action."""
+        """Проверить права доступа для текущего действия."""
         if view.action in {"list", "retrieve", "active", "by_group"}:
             return True
         if view.action in {"reveal", "click"}:
@@ -33,7 +33,7 @@ class PromoRolePermission(permissions.BasePermission):
 
 
 class PromoViewSet(ModelViewSet):
-    """REST API for promo codes with optimized queryset, annotations and filters."""
+    """REST API для промокодов с оптимизированным queryset, аннотациями и фильтрами."""
 
     serializer_class = PromoSerializer
     permission_classes = (PromoRolePermission,)
@@ -44,7 +44,7 @@ class PromoViewSet(ModelViewSet):
     ordering = ("-created_at",)
 
     def get_queryset(self):
-        """Return optimized queryset with select_related, prefetch_related and annotations."""
+        """Вернуть оптимизированный queryset с select_related, prefetch_related и аннотацией кликов."""
         today = now().date()
         q_active_and_valid = Q(is_active=True) & (Q(expires_at__gte=today) | Q(expires_at__isnull=True))
         q_has_code = ~Q(code__isnull=True) & ~Q(code="")
@@ -60,19 +60,19 @@ class PromoViewSet(ModelViewSet):
         )
 
     def get_serializer_context(self) -> dict[str, Any]:
-        """Pass role and code visibility to serializer through context."""
+        """Передать в сериализатор роль пользователя и флаг видимости промокода."""
         context = super().get_serializer_context()
         context["role"] = "admin" if self.request.user.is_staff else "buyer"
         context["reveal_codes"] = self.action in {"reveal"}
         return context
 
     def perform_create(self, serializer: PromoSerializer) -> None:
-        """Set current user as creator."""
+        """Установить текущего пользователя как создателя промокода."""
         serializer.save(created_by=self.request.user)
 
     @action(methods=["GET"], detail=False)
     def active(self, request: Request) -> Response:
-        """Return active valid promo codes."""
+        """Вернуть список активных и валидных промокодов."""
         promos = self.get_queryset().filter(is_active=True)
         page = self.paginate_queryset(promos)
         if page is not None:
@@ -82,7 +82,7 @@ class PromoViewSet(ModelViewSet):
 
     @action(methods=["POST"], detail=True)
     def deactivate(self, request: Request, pk: int | None = None) -> Response:
-        """Deactivate promo code. Staff-only by permission class."""
+        """Деактивировать промокод (доступно только сотрудникам)."""
         promo = self.get_object()
         promo.is_active = False
         promo.save(update_fields=("is_active",))
@@ -90,7 +90,7 @@ class PromoViewSet(ModelViewSet):
 
     @action(methods=["GET"], detail=True)
     def reveal(self, request: Request, pk: int | None = None) -> Response:
-        """Reveal promo code for authenticated buyer and register analytic click."""
+         """Показать промокод авторизованному пользователю и зарегистрировать клик."""
         promo = self.get_object()
         if not promo.can_be_used():
             return Response({"detail": "Промокод недоступен."}, status=status.HTTP_400_BAD_REQUEST)
@@ -100,14 +100,14 @@ class PromoViewSet(ModelViewSet):
 
     @action(methods=["POST"], detail=True)
     def click(self, request: Request, pk: int | None = None) -> Response:
-        """Register click without returning hidden code."""
+        """Зарегистрировать клик без раскрытия промокода."""
         promo = self.get_object()
         register_promo_click(promo, request)
         return Response({"status": "click registered"})
 
     @action(methods=["GET"], detail=False, url_path=r"by-group/(?P<group_id>\d+)")
     def by_group(self, request: Request, group_id: int | None = None) -> Response:
-        """Filter promo codes by group id from URL."""
+        """Отфильтровать промокоды по ID группы из URL."""
         promos = self.get_queryset().filter(groups__id=group_id).distinct()
         page = self.paginate_queryset(promos)
         if page is not None:
@@ -117,7 +117,7 @@ class PromoViewSet(ModelViewSet):
 
 
 class ShopViewSet(ModelViewSet):
-    """API for shops."""
+    """API для магазинов с аннотацией количества промокодов."""
 
     serializer_class = ShopSerializer
     queryset = Shop.objects.annotate(promo_count=Count("promos")).order_by("name")
@@ -127,7 +127,7 @@ class ShopViewSet(ModelViewSet):
 
 
 class PromoGroupViewSet(ReadOnlyModelViewSet):
-    """Read-only API for promo categories/groups."""
+     """Read‑only API для категорий/групп промокодов."""
 
     serializer_class = PromoGroupSerializer
     queryset = PromoGroup.objects.annotate(promo_count=Count("promos")).order_by("name")

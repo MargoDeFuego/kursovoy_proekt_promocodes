@@ -1,9 +1,10 @@
 """
-WSGI config for config project.
+WSGI‑конфигурация для проекта config.
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+Этот файл предоставляет WSGI‑приложение как переменную уровня модуля
+с именем ``application``.
 
-For more information on this file, see
+Подробную информацию об этом файле можно найти по ссылке:
 https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 """
 

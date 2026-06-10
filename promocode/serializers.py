@@ -1,4 +1,4 @@
-"""DRF serializers for promo-code API."""
+"""DRF‑сериализаторы для API промокодов."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from .models import Promo, PromoGroup, Shop
 
 
 class ShopSerializer(serializers.ModelSerializer):
-    """Serializer for shops."""
+    """Сериализатор магазинов."""
 
     promo_count = serializers.IntegerField(read_only=True)
 
@@ -22,7 +22,7 @@ class ShopSerializer(serializers.ModelSerializer):
 
 
 class PromoGroupSerializer(serializers.ModelSerializer):
-    """Serializer for promo groups/categories."""
+    """Сериализатор групп/категорий промокодов."""
 
     promo_count = serializers.IntegerField(read_only=True)
 
@@ -32,7 +32,7 @@ class PromoGroupSerializer(serializers.ModelSerializer):
 
 
 class PromoSerializer(serializers.ModelSerializer):
-    """Serializer with context-based code visibility and computed fields."""
+    """Сериализатор промокодов с контекстной видимостью кода и вычисляемыми полями."""
 
     shop_name = serializers.SerializerMethodField()
     group_names = serializers.SerializerMethodField()
@@ -69,15 +69,15 @@ class PromoSerializer(serializers.ModelSerializer):
         read_only_fields = ("created_by", "created_at", "used_count")
 
     def get_shop_name(self, obj: Promo) -> str:
-        """Return related shop name without extra queries if select_related is used."""
+        """Вернуть название магазина без дополнительных запросов при select_related."""
         return obj.shop.name
 
     def get_group_names(self, obj: Promo) -> list[str]:
-        """Return group/category names."""
+        """Вернуть список названий групп/категорий."""
         return [group.name for group in obj.groups.all()]
 
     def get_status(self, obj: Promo) -> str:
-        """Return user-friendly promo status."""
+        """Вернуть человекочитаемый статус промокода."""
         if not obj.is_active:
             return "inactive"
         if obj.is_expired:
@@ -87,11 +87,11 @@ class PromoSerializer(serializers.ModelSerializer):
         return "active"
 
     def get_discount_label(self, obj: Promo) -> str:
-        """Return text label for discount."""
+        """Вернуть текстовое описание скидки."""
         return f"Скидка {obj.discount_percent}%"
 
     def get_public_code(self, obj: Promo) -> str:
-        """Return hidden or visible code depending on serializer context."""
+        """Вернуть скрытый или открытый код в зависимости от контекста сериализатора."""
         if self.context.get("reveal_codes"):
             return obj.code
         request = self.context.get("request")
@@ -100,11 +100,10 @@ class PromoSerializer(serializers.ModelSerializer):
         return "•••••"
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate business rules through model.clean().
+        """Проверить бизнес‑правила через model.clean().
 
-        Many-to-many fields cannot be assigned directly to a Django model instance
-        before it is saved. DRF will save them later through serializer.save(),
-        so here we skip them and validate only scalar/model fields.
+        Поля many‑to‑many нельзя назначать модели до сохранения.
+        DRF сохранит их позже, поэтому здесь валидируются только обычные поля.
         """
         instance = self.instance or Promo()
         many_to_many_fields = {"groups"}
@@ -127,7 +126,7 @@ class PromoSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_expires_at(self, value: Any) -> Any:
-        """Reject past expiration dates for new active promo codes."""
+        """Запретить прошедшие даты окончания для новых активных промокодов."""
         if value and value < timezone.localdate():
             raise serializers.ValidationError("Дата окончания не может быть в прошлом.")
         return value

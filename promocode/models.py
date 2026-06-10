@@ -1,4 +1,4 @@
-"""Models for the promo-code catalogue application."""
+"""Модели приложения каталога промокодов."""
 
 from __future__ import annotations
 

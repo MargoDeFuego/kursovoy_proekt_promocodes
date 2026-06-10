@@ -1,4 +1,4 @@
-"""Django Filter classes for the promo API."""
+"""Классы Django Filter для API промокодов."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from .models import Promo, PromoGroup, Shop
 
 
 class PromoFilter(django_filters.FilterSet):
-    """Filter promos by shop, category/group, discount, date and min order amount."""
+    """Фильтрация промокодов по магазину, категории/группе, скидке, датам и минимальному заказу."""
 
     shop = django_filters.ModelChoiceFilter(
         queryset=Shop.objects.all(),
@@ -92,7 +92,7 @@ class PromoFilter(django_filters.FilterSet):
         )
 
     def filter_category(self, queryset: QuerySet[Promo], name: str, value: PromoGroup) -> QuerySet[Promo]:
-        """Filter promo codes by selected PromoGroup."""
+        """Фильтровать промокоды по выбранной группе PromoGroup."""
         if not value:
             return queryset
         return queryset.filter(groups=value).distinct()

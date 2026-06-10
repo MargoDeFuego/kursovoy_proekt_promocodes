@@ -1,4 +1,4 @@
-"""Authentication forms for the promo-code site."""
+"""Формы аутентификации для публичного сайта промокодов."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class RegisterForm(UserCreationForm):
-    """User registration form with required email field."""
+    """Форма регистрации пользователя с обязательным полем email."""
 
     email = forms.EmailField(required=True, label="Email")
 

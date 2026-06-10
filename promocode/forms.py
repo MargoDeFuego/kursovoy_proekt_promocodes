@@ -1,3 +1,5 @@
+"""Формы для управления промокодами на сайте."""
+
 from django import forms
 from django.core.validators import MinLengthValidator
 from django_select2.forms import Select2MultipleWidget, Select2Widget
@@ -6,7 +8,7 @@ from .models import Promo
 
 
 class PromoForm(forms.ModelForm):
-    """Form with explicit validation and Select2 widgets."""
+    """Форма промокода с явной валидацией и виджетами Select2."""
 
     title = forms.CharField(
         min_length=5,
@@ -47,5 +49,7 @@ class PromoForm(forms.ModelForm):
         }
 
     def clean(self):
+        """Запустить встроенную валидацию и вернуть очищенные данные."""
+        
         cleaned_data = super().clean()
         return cleaned_data

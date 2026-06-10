@@ -1,4 +1,4 @@
-"""Admin configuration for promo-code catalogue."""
+"""Конфигурация админ‑панели для каталога промокодов."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from .models import Promo, PromoClick, PromoGroup, Shop
 
 
 class PromoResource(resources.ModelResource):
-    """Import/export resource for promos with optimized queryset and custom export fields."""
+    """Ресурс импорта/экспорта промокодов с оптимизированным queryset и кастомными полями."""
 
     shop_name = fields.Field(column_name="shop_name")
     groups_list = fields.Field(column_name="groups")
@@ -37,24 +37,24 @@ class PromoResource(resources.ModelResource):
         )
 
     def get_export_queryset(self, request):
-        """Export only active promos with optimized relations."""
+        """Экспортировать только активные промокоды с оптимизированными связями."""
         return Promo.objects.select_related("shop").prefetch_related("groups").filter(is_active=True)
 
     def dehydrate_code(self, obj: Promo) -> str:
-        """Mask promo code in export."""
+        """Маскировать промокод при экспорте."""
         return (obj.code[:4] + "****") if obj.code else "—"
 
     def dehydrate_shop_name(self, obj: Promo) -> str:
-        """Export shop name."""
+        """Экспортировать название магазина."""
         return obj.shop.name if obj.shop_id else "—"
 
     def dehydrate_groups_list(self, obj: Promo) -> str:
-        """Export comma-separated group names."""
+        """Экспортировать список групп через запятую."""
         return ", ".join(group.name for group in obj.groups.all())
 
 
 class PromoInline(admin.TabularInline):
-    """Inline promos on Shop page."""
+    """Встроенный список промокодов на странице магазина."""
 
     model = Promo
     extra = 0
@@ -64,7 +64,7 @@ class PromoInline(admin.TabularInline):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    """Shop admin with annotated promo count."""
+    """Админ‑панель магазинов с аннотацией количества промокодов."""
 
     list_display = ("name", "category", "website", "promo_count")
     list_display_links = ("name",)
@@ -72,18 +72,18 @@ class ShopAdmin(admin.ModelAdmin):
     inlines = (PromoInline,)
 
     def get_queryset(self, request):
-        """Annotate promo count for list display."""
+        """Аннотировать количество промокодов для отображения в списке."""
         return super().get_queryset(request).annotate(_promo_count=Count("promos"))
 
     @admin.display(description="Кол-во промокодов", ordering="_promo_count")
     def promo_count(self, obj: Shop) -> int:
-        """Return annotated promo count."""
+        """Вернуть аннотированное количество промокодов."""
         return obj._promo_count
 
 
 @admin.register(Promo)
 class PromoAdmin(ImportExportModelAdmin):
-    """Promo admin with groups, shop links and business fields."""
+    """Админ‑панель промокодов с группами, ссылками на магазины и бизнес‑полями."""
 
     resource_class = PromoResource
     list_display = (
@@ -126,12 +126,12 @@ class PromoAdmin(ImportExportModelAdmin):
 
     @admin.display(description="Промокод")
     def hidden_code(self, obj: Promo) -> str:
-        """Show full code in admin."""
+        """Показать полный промокод в админке."""
         return obj.code or "—"
 
     @admin.display(description="Магазин")
     def shop_link(self, obj: Promo) -> str:
-        """Return link to related Shop admin page."""
+        """Вернуть ссылку на магазин в админке."""
         if not obj.shop_id:
             return "—"
         url = reverse("admin:promocode_shop_change", args=[obj.shop_id])
@@ -139,7 +139,7 @@ class PromoAdmin(ImportExportModelAdmin):
 
     @admin.display(description="Группы")
     def groups_links(self, obj: Promo) -> str:
-        """Return admin links to related groups."""
+        """Вернуть ссылки на группы в админке."""
         groups = obj.groups.all()
         if not groups:
             return "—"
@@ -151,13 +151,13 @@ class PromoAdmin(ImportExportModelAdmin):
 
     @admin.display(description="Клики", ordering="_click_count")
     def click_count(self, obj: Promo) -> int:
-        """Return annotated click count."""
+        """Вернуть аннотированное количество кликов."""
         return obj._click_count
 
 
 @admin.register(PromoGroup)
 class PromoGroupAdmin(admin.ModelAdmin):
-    """Promo group admin."""
+    """Админ‑панель групп промокодов."""
 
     list_display = ("name", "slug", "promo_count")
     list_display_links = ("name",)
@@ -165,18 +165,18 @@ class PromoGroupAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
     def get_queryset(self, request):
-        """Annotate promo count."""
+        """Аннотировать количество промокодов в группе."""
         return super().get_queryset(request).annotate(_promo_count=Count("promos", distinct=True))
 
     @admin.display(description="Кол-во промокодов", ordering="_promo_count")
     def promo_count(self, obj: PromoGroup) -> int:
-        """Return annotated promo count."""
+        """Вернуть аннотированное количество промокодов."""
         return obj._promo_count
 
 
 @admin.register(PromoClick)
 class PromoClickAdmin(admin.ModelAdmin):
-    """Read-only click analytics admin."""
+    """Админ‑панель аналитики кликов (только для чтения)."""
 
     list_display = ("promo", "user", "ip_address", "created_at")
     list_filter = ("created_at",)
@@ -184,5 +184,5 @@ class PromoClickAdmin(admin.ModelAdmin):
     readonly_fields = ("promo", "user", "ip_address", "user_agent", "created_at")
 
     def has_add_permission(self, request) -> bool:
-        """Forbid manual adding of analytic clicks."""
+        """Запретить ручное добавление кликов."""
         return False

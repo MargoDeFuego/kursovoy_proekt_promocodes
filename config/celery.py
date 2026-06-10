@@ -1,4 +1,4 @@
-"""Celery application configuration."""
+"""Конфигурация приложения Celery."""
 
 from __future__ import annotations
 
