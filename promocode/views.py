@@ -11,7 +11,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout as django_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 
@@ -20,7 +20,7 @@ from .forms import PromoForm
 from .forms_auth import RegisterForm
 from .models import Promo, PromoGroup, Shop
 from .services import register_promo_click
-from .auth_utils import clear_site_user, set_site_user, site_login_required
+from .auth_utils import clear_site_user, get_public_user, set_site_user, site_login_required
 
 
 def staff_required(function):
@@ -47,9 +47,14 @@ def site_login(request: HttpRequest) -> HttpResponse:
 
 
 def site_logout(request: HttpRequest) -> HttpResponse:
-    """Log out only from the public-site account, keeping /admin/ session alive."""
+    """Log out from the public site without destroying the staff admin session."""
+    should_logout_django_user = request.user.is_authenticated and not request.user.is_staff
+
     clear_site_user(request)
-    messages.success(request, "Вы вышли из личного кабинета. Админ-панель не была разлогинена.")
+    if should_logout_django_user:
+        django_logout(request)
+
+    messages.success(request, "Вы вышли из личного кабинета.")
     return redirect("promo_list")
 
 
@@ -183,8 +188,18 @@ def promo_reveal(request: HttpRequest, pk: int) -> HttpResponse:
 
 @require_POST
 def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
-    """Reveal promo code from the list page and register the click."""
+    """Reveal promo code from the list page and register the click.""" 
+
+    # Блокируем гостей, но разрешаем оба варианта входа:
+    # обычный вход сайта через site_user_id и Google OAuth через request.user.
+    if get_public_user(request) is None and not (request.user.is_authenticated and request.user.is_staff):
+        return JsonResponse(
+            {"ok": False, "error": "Авторизуйтесь, чтобы увидеть промокод."},
+            status=403,
+        )
+
     promo = get_object_or_404(Promo.objects.select_related("shop"), pk=pk)
+
     if not promo.can_be_used():
         return JsonResponse(
             {"ok": False, "error": "Промокод недоступен или срок его действия истёк."},
@@ -192,6 +207,7 @@ def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
         )
 
     register_promo_click(promo, request)
+    """AJAX POST на promo_reveal_list"""
     return JsonResponse(
         {
             "ok": True,
@@ -199,6 +215,7 @@ def promo_reveal_list(request: HttpRequest, pk: int) -> JsonResponse:
             "click_count": promo.clicks.count(),
         }
     )
+
 
 
 @staff_required

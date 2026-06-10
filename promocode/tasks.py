@@ -14,7 +14,9 @@ from .services import deactivate_expired_promos
 @shared_task
 def deactivate_expired_promos_task() -> int:
     """Celery task: deactivate expired active promo codes."""
-    return deactivate_expired_promos()
+    count = deactivate_expired_promos()
+    send_expiring_promos_report.delay("test@example.com")
+    return count
 
 
 @shared_task

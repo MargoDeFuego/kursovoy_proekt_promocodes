@@ -5,6 +5,27 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# Sentry is enabled only when SENTRY_DSN is provided.
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_logging = LoggingIntegration(
+        level=20,        # INFO
+        event_level=40,  # ERROR
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), sentry_logging],
+        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        send_default_pii=False,
+        environment=os.environ.get("SENTRY_ENVIRONMENT", "local"),
+    )
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "unsafe-dev-secret-key")
@@ -130,23 +151,9 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     "deactivate-expired-promos-every-hour": {
         "task": "promocode.tasks.deactivate_expired_promos_task",
-        "schedule": 3600.0,
+        "schedule": 60.0,
     },
 }
-
-# Sentry is enabled only when SENTRY_DSN is provided.
-SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
-if SENTRY_DSN:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
-        send_default_pii=False,
-        environment=os.environ.get("SENTRY_ENVIRONMENT", "local"),
-    )
 
 # OAuth2 login through Google using social-auth-app-django.
 AUTHENTICATION_BACKENDS = (
@@ -157,5 +164,4 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("GOOGLE_OAUTH2_KEY", "")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("GOOGLE_OAUTH2_SECRET", "")
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
-
 SILKY_PYTHON_PROFILER = True

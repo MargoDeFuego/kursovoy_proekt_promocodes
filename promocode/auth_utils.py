@@ -49,9 +49,34 @@ def clear_site_user(request: HttpRequest) -> None:
     request.session.modified = True
 
 
+def get_public_user(request: HttpRequest) -> Any | None:
+    """Return the user for the public site.
+
+    The public site may authenticate users in two ways:
+    * regular username/password form stores ``site_user_id``;
+    * Google OAuth authenticates through Django's standard ``request.user``.
+
+    Staff/admin users are intentionally not treated as a public-site user here,
+    so the admin session stays separate from the shop user session.
+    """
+    site_user = get_site_user(request)
+    if site_user is not None:
+        return site_user
+
+    request_user = getattr(request, "user", None)
+    if (
+        request_user is not None
+        and request_user.is_authenticated
+        and not request_user.is_staff
+    ):
+        return request_user
+
+    return None
+
+
 def site_user_is_authenticated(request: HttpRequest) -> bool:
     """Return ``True`` when a public-site user is logged in."""
-    return get_site_user(request) is not None
+    return get_public_user(request) is not None
 
 
 def site_login_required(view_func: F) -> F:
@@ -63,9 +88,9 @@ def site_login_required(view_func: F) -> F:
 
     @wraps(view_func)
     def wrapper(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if get_site_user(request) is not None:
+        if get_public_user(request) is not None:
             return view_func(request, *args, **kwargs)
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and request.user.is_staff:
             return view_func(request, *args, **kwargs)
         return redirect(f"/accounts/login/?next={request.path}")
 
